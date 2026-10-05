@@ -3,7 +3,7 @@
 // Optional: COACH_ALLOWED_ORIGINS (comma-separated) to restrict callers.
 import Anthropic from "@anthropic-ai/sdk";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { COACH_SYSTEM, COACH_TOOLS, LIMITS, PROPOSED, REMEMBERED, toAction, type CoachAction, type CoachTurn } from "../src/coach/spec";
+import { COACH_SYSTEM, COACH_TOOLS, LIMITS, PROPOSED, REMEMBERED, toAction, type CoachAction, type CoachTurn } from "../src/coach/spec.js";
 
 const MODEL = "claude-opus-5-5";
 const MAX_ROUNDS = 4;
