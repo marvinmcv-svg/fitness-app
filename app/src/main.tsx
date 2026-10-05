@@ -8,3 +8,12 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </StrictMode>,
 );
+
+// Offline support when installed from a real web address (not inside the claude.ai preview frame).
+if (import.meta.env.PROD && "serviceWorker" in navigator && location.protocol === "https:" && window.top === window.self) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      /* offline mode unavailable; the app still works online */
+    });
+  });
+}
