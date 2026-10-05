@@ -1,0 +1,643 @@
+<title>Setwise</title>
+<meta name="description" content="Setwise is the training log that understands how you train: a personalized program, weekly sets per muscle, and macros from a photo. Join the waitlist." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" />
+<style>
+  /* Layout: a dark training-floor hero (phone playing the real demo + waitlist form),
+     then light sections that each pair one claim with one real screen from the app. */
+  :root {
+    --bg: #f4f3f9;
+    --surface: #ffffff;
+    --ink: #17142a;
+    --ink-2: #4a4662;
+    --muted: #77738c;
+    --line: rgba(23, 20, 42, 0.1);
+    --accent: #6447f0;
+    --accent-ink: #ffffff;
+    --accent-soft: #ebe7ff;
+    --night: #150f26;
+    --night-2: #241a45;
+    --night-ink: #f6f4ff;
+    --night-muted: rgba(246, 244, 255, 0.66);
+    --night-line: rgba(255, 255, 255, 0.12);
+    --lilac: #b3a4ff;
+    --teal: #19b3a6;
+    --amber: #e9a23b;
+    --rose: #e5517f;
+    --good: #1ea672;
+    --danger: #d9465b;
+
+    --display: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
+    --body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    --wrap: 1120px;
+    --gutter: clamp(16px, 4vw, 40px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d0b16;
+      --surface: #181527;
+      --ink: #f2f0fb;
+      --ink-2: #c8c4dc;
+      --muted: #9a96b2;
+      --line: rgba(255, 255, 255, 0.1);
+      --accent: #8b75ff;
+      --accent-soft: #261f47;
+      --night: #120d22;
+      --night-2: #2a1f52;
+      --good: #35c98d;
+      --danger: #ff6b80;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d0b16;
+    --surface: #181527;
+    --ink: #f2f0fb;
+    --ink-2: #c8c4dc;
+    --muted: #9a96b2;
+    --line: rgba(255, 255, 255, 0.1);
+    --accent: #8b75ff;
+    --accent-soft: #261f47;
+    --night: #120d22;
+    --night-2: #2a1f52;
+    --good: #35c98d;
+    --danger: #ff6b80;
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 16px/1.6 var(--body);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, p { margin: 0; }
+  h1, h2, h3 { text-wrap: balance; }
+  a { color: inherit; }
+  img, video { max-width: 100%; display: block; }
+  button, input, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 2.5px solid var(--lilac); outline-offset: 3px; border-radius: 6px; }
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding-inline: var(--gutter); }
+  .eyebrow {
+    font: 500 12.5px/1 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* ------------------------------------------------------------- nav */
+  .nav {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: color-mix(in srgb, var(--night) 88%, transparent);
+    -webkit-backdrop-filter: saturate(160%) blur(16px);
+    backdrop-filter: saturate(160%) blur(16px);
+    border-bottom: 1px solid var(--night-line);
+    color: var(--night-ink);
+  }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; font: 800 19px/1 var(--display); letter-spacing: -0.01em; text-decoration: none; }
+  .brand-mark { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--lilac); color: var(--night); }
+  .nav-links { display: flex; align-items: center; gap: 22px; font-size: 14.5px; font-weight: 600; }
+  .nav-links a { text-decoration: none; color: var(--night-muted); }
+  .nav-links a:hover { color: var(--night-ink); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 48px; padding: 0 22px; border: 0; border-radius: 14px;
+    background: var(--accent); color: var(--accent-ink);
+    font-weight: 700; font-size: 15.5px; cursor: pointer; text-decoration: none;
+    transition: transform 0.15s, filter 0.15s;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.55; cursor: default; }
+  .btn-sm { height: 38px; padding: 0 16px; border-radius: 11px; font-size: 14px; }
+  @media (max-width: 720px) { .nav-links a { display: none; } }
+
+  /* ------------------------------------------------------------ hero */
+  .hero {
+    position: relative;
+    color: var(--night-ink);
+    background:
+      radial-gradient(60% 70% at 85% 20%, var(--night-2), transparent 70%),
+      radial-gradient(40% 50% at 10% 100%, color-mix(in srgb, var(--teal) 18%, transparent), transparent 70%),
+      var(--night);
+    overflow: hidden;
+  }
+  .hero .wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+    padding-block: clamp(40px, 7vw, 88px) clamp(48px, 7vw, 96px);
+  }
+  .hero .eyebrow { color: var(--lilac); }
+  .hero h1 {
+    margin-top: 18px;
+    font: 800 clamp(42px, 6.4vw, 78px)/0.98 var(--display);
+    letter-spacing: -0.035em;
+  }
+  .hero h1 .lift { color: var(--lilac); }
+  .hero-sub { margin-top: 20px; font-size: clamp(16.5px, 1.6vw, 19px); color: var(--night-muted); max-width: 34em; }
+
+  .waitlist { margin-top: 30px; display: flex; flex-direction: column; gap: 12px; max-width: 520px; }
+  .wl-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .wl-row input, .wl-row select {
+    height: 52px; border-radius: 14px; border: 1px solid var(--night-line);
+    background: rgba(255, 255, 255, 0.07); color: var(--night-ink);
+    padding: 0 16px; font-size: 16px; outline: none; min-width: 0;
+  }
+  .wl-row input { flex: 1 1 240px; }
+  .wl-row select { flex: 1 1 180px; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--night-muted) 50%), linear-gradient(135deg, var(--night-muted) 50%, transparent 50%); background-position: calc(100% - 20px) 22px, calc(100% - 15px) 22px; background-size: 5px 5px; background-repeat: no-repeat; }
+  .wl-row select option { color: #17142a; }
+  .wl-row input::placeholder { color: var(--night-muted); }
+  .wl-row input:focus, .wl-row select:focus { border-color: var(--lilac); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lilac) 30%, transparent); }
+  .wl-row .btn { height: 52px; flex: 1 1 100%; }
+  .wl-note { font-size: 13.5px; color: var(--night-muted); }
+  .wl-msg { font-size: 14.5px; padding: 12px 14px; border-radius: 12px; }
+  .wl-msg.err { background: color-mix(in srgb, var(--danger) 22%, transparent); color: #ffd9df; }
+  .wl-done {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 18px; border-radius: 16px;
+    background: color-mix(in srgb, var(--good) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--good) 40%, transparent);
+  }
+  .wl-done-icon { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--good); color: #fff; }
+  .wl-done strong { display: block; font-size: 16.5px; }
+  .wl-done span { font-size: 14px; color: var(--night-muted); }
+  .wl-done button { margin-top: 6px; background: none; border: 0; padding: 0; color: var(--lilac); font-weight: 600; font-size: 14px; cursor: pointer; }
+
+  .proof { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 13.5px; color: var(--night-muted); }
+  .proof span { display: inline-flex; align-items: center; gap: 7px; }
+  .proof svg { color: var(--lilac); }
+
+  /* phone + chapters */
+  .demo { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .phone {
+    position: relative;
+    width: min(320px, 78vw);
+    aspect-ratio: 780 / 1688;
+    max-width: 100%;
+    border-radius: 46px;
+    padding: 10px;
+    background: #0a0814;
+    box-shadow:
+      0 0 0 1.5px rgba(255, 255, 255, 0.16),
+      0 40px 80px rgba(0, 0, 0, 0.55),
+      0 0 120px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .phone video { width: 100%; height: 100%; object-fit: cover; border-radius: 37px; background: #f3f2f8; }
+  .phone::after { content: ""; position: absolute; top: 20px; left: 50%; width: 92px; height: 26px; margin-left: -46px; border-radius: 14px; background: #000; }
+  .play {
+    position: absolute; right: 22px; bottom: 22px; z-index: 2;
+    width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
+    display: grid; place-items: center;
+    background: rgba(21, 15, 38, 0.82); color: #fff;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .chapters { width: min(360px, 100%); display: flex; flex-direction: column; gap: 2px; }
+  .chapter {
+    display: grid; grid-template-columns: 44px 1fr; align-items: center; gap: 10px;
+    width: 100%; padding: 7px 10px; border: 0; border-radius: 10px; text-align: left; cursor: pointer;
+    background: transparent; color: var(--night-muted); font-size: 14px; font-weight: 600;
+    position: relative; overflow: hidden;
+  }
+  .chapter .t { font: 500 12px/1 var(--mono); color: var(--night-muted); opacity: 0.8; }
+  .chapter:hover { color: var(--night-ink); }
+  .chapter.on { color: var(--night-ink); background: rgba(255, 255, 255, 0.07); }
+  .chapter.on .t { color: var(--lilac); opacity: 1; }
+  .chapter .bar { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--lilac); width: 0; }
+
+  @media (max-width: 880px) {
+    .hero .wrap { grid-template-columns: 1fr; }
+    .demo { order: 2; }
+  }
+
+  /* ---------------------------------------------------------- sections */
+  section.band { padding-block: clamp(56px, 8vw, 104px); }
+  .band-head { max-width: 680px; display: flex; flex-direction: column; gap: 14px; }
+  .band-head h2 { font: 800 clamp(30px, 4vw, 46px)/1.04 var(--display); letter-spacing: -0.03em; }
+  .band-head p { color: var(--ink-2); font-size: 17.5px; }
+
+  .gap-list { margin-top: 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .gap { padding: 22px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+  .gap h3 { font: 700 19px/1.25 var(--display); letter-spacing: -0.01em; }
+  .gap p { color: var(--ink-2); font-size: 15px; }
+  .gap .tag { align-self: flex-start; font: 500 11.5px/1 var(--mono); letter-spacing: 0.05em; padding: 6px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); }
+  @media (max-width: 860px) { .gap-list { grid-template-columns: 1fr; } }
+
+  .feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 6vw, 80px); align-items: center; padding-block: clamp(36px, 5vw, 60px); }
+  .feature + .feature { border-top: 1px solid var(--line); }
+  .feature.flip .shot-wrap { order: -1; }
+  .feature-text { display: flex; flex-direction: column; gap: 14px; }
+  .feature-text h3 { font: 800 clamp(26px, 3vw, 36px)/1.08 var(--display); letter-spacing: -0.025em; }
+  .feature-text p { color: var(--ink-2); font-size: 17px; max-width: 32em; }
+  .ticks { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .ticks li { display: flex; gap: 10px; align-items: flex-start; font-size: 15.5px; }
+  .ticks svg { flex: none; margin-top: 4px; color: var(--accent); }
+  .unit { font-family: var(--mono); font-size: 0.9em; color: var(--accent); }
+  .shot-wrap { display: flex; justify-content: center; }
+  .shot {
+    width: min(300px, 82vw); max-width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top;
+    border-radius: 34px; border: 8px solid #0d0b18;
+    box-shadow: 0 30px 60px rgba(23, 20, 42, 0.18);
+  }
+  @media (max-width: 820px) {
+    .feature { grid-template-columns: 1fr; }
+    .feature.flip .shot-wrap { order: 0; }
+  }
+
+  .faq { margin-top: 36px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; }
+  .faq details { border-top: 1px solid var(--line); padding-block: 16px; }
+  .faq summary { cursor: pointer; font-weight: 700; font-size: 17px; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font-family: var(--mono); color: var(--accent); }
+  .faq details[open] summary::after { content: "–"; }
+  .faq details p { margin-top: 10px; color: var(--ink-2); font-size: 15.5px; }
+  @media (max-width: 760px) { .faq { grid-template-columns: 1fr; } }
+
+  .closing { color: var(--night-ink); background: radial-gradient(70% 90% at 50% 0%, var(--night-2), transparent 70%), var(--night); text-align: left; }
+  .closing .wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; padding-block: clamp(56px, 8vw, 96px); }
+  .closing h2 { font: 800 clamp(32px, 4.6vw, 54px)/1.02 var(--display); letter-spacing: -0.03em; max-width: 14em; }
+  .closing p { color: var(--night-muted); font-size: 17.5px; max-width: 36em; }
+  footer { padding-block: 26px; font-size: 13.5px; color: var(--muted); }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  /* owner-only signups panel */
+  .admin { margin-top: 28px; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px dashed var(--accent); }
+  .admin h3 { font: 700 17px/1.2 var(--display); display: flex; justify-content: space-between; gap: 12px; }
+  .admin p { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
+  .admin-table { margin-top: 12px; overflow-x: auto; }
+  .admin table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .admin th, .admin td { text-align: left; padding: 8px 10px; border-top: 1px solid var(--line); white-space: nowrap; }
+  .admin th { font: 500 11.5px/1 var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .admin td.num { font-variant-numeric: tabular-nums; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Setwise home">
+      <span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11" /></svg></span>
+      Setwise
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#features">Features</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn btn-sm" href="#join">Join the waitlist</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">Strength training · Macros · Early access</p>
+        <h1>Train smarter.<br /><span class="lift">Eat on target.</span></h1>
+        <p class="hero-sub">Setwise builds your program from a 7-question check-in, counts your weekly sets for every muscle, and logs your meals from a photo. Join the waitlist to get it first.</p>
+
+        <div id="join">
+          <form class="waitlist" id="wl-form" novalidate>
+            <div class="wl-row">
+              <input id="wl-email" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Email address" required />
+              <select id="wl-goal" aria-label="Main goal">
+                <option value="">My main goal…</option>
+                <option value="muscle">Build muscle</option>
+                <option value="strength">Get stronger</option>
+                <option value="fat_loss">Lose fat</option>
+                <option value="fitness">Stay fit</option>
+              </select>
+              <button class="btn" id="wl-submit" type="submit">Join the waitlist</button>
+            </div>
+            <p class="wl-msg err" id="wl-error" role="alert" hidden></p>
+            <p class="wl-note">One email when your invite is ready. No spam, unsubscribe any time.</p>
+          </form>
+          <div class="wl-done" id="wl-done" role="status" hidden>
+            <span class="wl-done-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg></span>
+            <div>
+              <strong>You're on the list.</strong>
+              <span id="wl-done-text">We'll email you when your invite is ready.</span><br />
+              <button type="button" id="wl-change">Change email</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="proof">
+          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>Unlimited routines, free</span>
+          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>Works offline in the gym</span>
+          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>Macros from a photo</span>
+        </div>
+      </div>
+
+      <div class="demo" aria-label="Product demo">
+        <div class="phone">
+          <video id="demo" src="demo.mp4" poster="poster.jpg" muted loop playsinline preload="metadata" aria-label="Setwise app walkthrough, 57 seconds"></video>
+          <button class="play" id="play" type="button" aria-label="Pause demo">
+            <svg id="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
+          </button>
+        </div>
+        <div class="chapters" id="chapters" role="list" aria-label="Demo chapters"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="features">
+    <div class="wrap">
+      <div class="band-head">
+        <p class="eyebrow">Why Setwise</p>
+        <h2>Most workout apps log what you lifted. Setwise understands how you trained.</h2>
+        <p>Primers, partials, eccentrics and weekly volume targets are built into the app, so you never squeeze them into a notes field.</p>
+      </div>
+      <div class="gap-list">
+        <article class="gap">
+          <span class="tag">No caps</span>
+          <h3>Unlimited routines on the free plan</h3>
+          <p>A push/pull/legs split repeated twice is already six routines. Setwise never charges you for having a real program.</p>
+        </article>
+        <article class="gap">
+          <span class="tag">Technique-aware</span>
+          <h3>Partials and eccentrics count</h3>
+          <p>Log “+4 partials” on the set where they happened. Primer and warm-up sets stay out of your volume totals.</p>
+        </article>
+        <article class="gap">
+          <span class="tag">Sets per muscle</span>
+          <h3>Weekly targets for every muscle</h3>
+          <p>See which muscles are behind before the week ends, so you can fix it on Thursday instead of noticing next month.</p>
+        </article>
+      </div>
+
+      <div class="feature">
+        <div class="feature-text">
+          <p class="eyebrow">Personal from day one</p>
+          <h3>Seven questions. One program that fits.</h3>
+          <p>Tell Setwise your goal, experience, schedule and equipment. It picks Full Body, Upper / Lower or a 6-day split and fills it with exercises you can actually do.</p>
+          <ul class="ticks">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Home with dumbbells? Cable moves are swapped for ones that work there.</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Pick up to 3 focus muscles and each gets an extra set.</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Swap any exercise for one with the same movement and muscles.</span></li>
+          </ul>
+        </div>
+        <div class="shot-wrap"><img class="shot" src="shot-9.jpg" alt="The Setwise questionnaire asking which muscles to bring up" /></div>
+      </div>
+
+      <div class="feature flip">
+        <div class="feature-text">
+          <p class="eyebrow">In the gym</p>
+          <h3>Log a set in two taps. Know what to lift next time.</h3>
+          <p>Last session's numbers sit next to every set. Hit the top of your rep range on every set and Setwise suggests the next weight, rounded to the nearest 2.5 kg.</p>
+          <ul class="ticks">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Rest timer starts when you tick a set: <span class="unit">60 s</span> for primers, <span class="unit">150 s</span> for heavy work.</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Heavy lifts add weight after a clean session and deload <span class="unit">10%</span> after three misses in a row.</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Your screen stays awake while you train, and logging works without signal.</span></li>
+          </ul>
+        </div>
+        <div class="shot-wrap"><img class="shot" src="shot-30.jpg" alt="A workout in progress with completed sets and a rest timer" /></div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-text">
+          <p class="eyebrow">Nutrition</p>
+          <h3>Snap your plate. Get your macros.</h3>
+          <p>Your calorie and protein targets come from your check-in. Take a photo of your meal for an estimate of each food, scan a barcode, or search the food list.</p>
+          <ul class="ticks">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Protein, carb and fat rings show grams left for the day.</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Photo estimates list each food so you can untick anything that's wrong.</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Barcodes are matched against Open Food Facts.</span></li>
+          </ul>
+        </div>
+        <div class="shot-wrap"><img class="shot" src="shot-44.jpg" alt="Adding chicken breast to breakfast from the food search" /></div>
+      </div>
+
+      <div class="feature flip">
+        <div class="feature-text">
+          <p class="eyebrow">Progress</p>
+          <h3>See every muscle against its target band.</h3>
+          <p>Bars turn green when a muscle lands inside its weekly range and stay violet while it's behind. Secondary muscles count as half a set, so the numbers stay honest.</p>
+          <ul class="ticks">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Targets from <span class="unit">8–14</span> sets for new lifters to <span class="unit">12–24</span> for advanced.</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Sessions, working sets and tonnage for the last 7 days.</span></li>
+          </ul>
+        </div>
+        <div class="shot-wrap"><img class="shot" src="shot-53.jpg" alt="Progress screen with weekly sets per muscle against a target band" /></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="faq" style="padding-top: 0">
+    <div class="wrap">
+      <div class="band-head">
+        <p class="eyebrow">Questions</p>
+        <h2>Before you join</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Is Setwise free?</summary>
+          <p>Logging, unlimited routines, your history and the weekly muscle counter are free. A Pro plan will add automatic progression, the full planner and deeper analytics.</p>
+        </details>
+        <details>
+          <summary>Which phones does it work on?</summary>
+          <p>Setwise runs in the browser on iPhone and Android, and you can add it to your home screen. Native apps with Apple Health and Health Connect come next.</p>
+        </details>
+        <details>
+          <summary>Does it work without signal?</summary>
+          <p>Yes. Workouts are saved on your phone first, so a dead zone in the gym never loses a set.</p>
+        </details>
+        <details>
+          <summary>How accurate are photo estimates?</summary>
+          <p>They're estimates, not lab measurements. You see every food and its grams before saving, and can untick anything that's wrong.</p>
+        </details>
+        <details>
+          <summary>Can I bring my history from another app?</summary>
+          <p>Import from Strong and Hevy CSV exports is on the launch list, so you keep your past numbers.</p>
+        </details>
+        <details>
+          <summary>What happens to my email?</summary>
+          <p>It's used only to send your invite and launch news.</p>
+        </details>
+      </div>
+      <div class="admin" id="admin" hidden>
+        <h3><span>Waitlist signups</span><span id="admin-count">0</span></h3>
+        <p>Only you can see this panel and these emails.</p>
+        <div class="admin-table"><table><thead><tr><th>Email</th><th>Goal</th><th>Joined</th></tr></thead><tbody id="admin-rows"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <p class="eyebrow" style="color: var(--lilac)">Early access</p>
+      <h2>Your next block starts with a better plan.</h2>
+      <p>Get an invite as soon as Setwise opens up.</p>
+      <a class="btn" href="#join" id="closing-cta">Join the waitlist</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Setwise</span>
+    <span>Demo video recorded from the working app, with sample workouts.</span>
+  </div>
+</footer>
+
+<script>
+  /* ---------------------------------------------------------- demo video */
+  const CHAPTERS = [
+    { t: 0.6, title: "Sign up in one tap" },
+    { t: 4.2, title: "Answer 7 quick questions" },
+    { t: 14.9, title: "Get a plan built for you" },
+    { t: 21.4, title: "See every muscle against its weekly target" },
+    { t: 25.2, title: "Log sets with a rest timer" },
+    { t: 34.9, title: "Swap any exercise" },
+    { t: 38.9, title: "Track macros by photo, barcode or search" },
+    { t: 51.7, title: "Watch your progress" },
+  ];
+  const video = document.getElementById("demo");
+  const list = document.getElementById("chapters");
+  const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  const items = CHAPTERS.map((c, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chapter";
+    b.setAttribute("role", "listitem");
+    b.innerHTML = `<span class="t">${fmt(c.t)}</span><span></span><span class="bar"></span>`;
+    b.children[1].textContent = c.title;
+    b.addEventListener("click", () => {
+      video.currentTime = c.t;
+      video.play().catch(() => {});
+      setPlaying(true);
+    });
+    list.appendChild(b);
+    return b;
+  });
+  video.addEventListener("timeupdate", () => {
+    const t = video.currentTime;
+    const dur = video.duration || 57;
+    let active = 0;
+    CHAPTERS.forEach((c, i) => { if (t >= c.t) active = i; });
+    items.forEach((el, i) => {
+      el.classList.toggle("on", i === active);
+      const start = CHAPTERS[i].t;
+      const end = CHAPTERS[i + 1]?.t ?? dur;
+      el.querySelector(".bar").style.width = i === active ? `${Math.min(100, ((t - start) / (end - start)) * 100)}%` : "0";
+    });
+  });
+
+  const playBtn = document.getElementById("play");
+  const playIcon = document.getElementById("play-icon");
+  function setPlaying(on) {
+    playBtn.setAttribute("aria-label", on ? "Pause demo" : "Play demo");
+    playIcon.innerHTML = on ? '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/>' : '<path d="M8 5.5v13l10.5-6.5z"/>';
+  }
+  playBtn.addEventListener("click", () => {
+    if (video.paused) { video.play().catch(() => {}); setPlaying(true); }
+    else { video.pause(); setPlaying(false); }
+  });
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) setPlaying(false);
+  else video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+
+  /* ------------------------------------------------------------ waitlist */
+  const form = document.getElementById("wl-form");
+  const email = document.getElementById("wl-email");
+  const goal = document.getElementById("wl-goal");
+  const submit = document.getElementById("wl-submit");
+  const errorEl = document.getElementById("wl-error");
+  const done = document.getElementById("wl-done");
+  const doneText = document.getElementById("wl-done-text");
+  let db = null, myId = null;
+
+  function showDone(addr) {
+    form.hidden = true;
+    done.hidden = false;
+    doneText.textContent = `We'll email ${addr} when your invite is ready.`;
+  }
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.hidden = false;
+  }
+  document.getElementById("wl-change").addEventListener("click", () => {
+    done.hidden = true;
+    form.hidden = false;
+    email.focus();
+  });
+  document.getElementById("closing-cta").addEventListener("click", () => setTimeout(() => (form.hidden ? null : email.focus()), 400));
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.hidden = true;
+    const addr = email.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(addr)) return showError("Enter a valid email address, like you@example.com.");
+    if (!db || !myId) return showError("Sign in to Claude to join the waitlist from this page.");
+    submit.disabled = true;
+    submit.textContent = "Joining…";
+    try {
+      await db.doc(`waitlist/${myId}`).set({ email: addr, goal: goal.value || null, joinedAt: new Date().toISOString() });
+      showDone(addr);
+    } catch (err) {
+      showError(err && err.code === "invalid_argument"
+        ? "Your access to this page doesn't allow joining. Ask the owner to share it with you as a Contributor."
+        : "Couldn't save your spot. Check your connection and try again.");
+    } finally {
+      submit.disabled = false;
+      submit.textContent = "Join the waitlist";
+    }
+  });
+
+  (async () => {
+    const claude = window.claude;
+    if (!claude || !claude.use) return;
+    const [dbNs, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    db = dbNs;
+    if (!db || !user) return;
+    myId = await user.id();
+    try {
+      const mine = await db.doc(`waitlist/${myId}`).get();
+      if (mine.exists) {
+        const d = mine.data();
+        email.value = d.email || "";
+        goal.value = d.goal || "";
+        showDone(d.email || "you");
+      }
+    } catch { /* first visit */ }
+
+    if (await user.isOwner()) {
+      const panel = document.getElementById("admin");
+      const rows = document.getElementById("admin-rows");
+      const count = document.getElementById("admin-count");
+      const GOALS = { muscle: "Build muscle", strength: "Get stronger", fat_loss: "Lose fat", fitness: "Stay fit" };
+      panel.hidden = false;
+      db.collection("waitlist").orderBy("joinedAt", "desc").onSnapshot((snap) => {
+        count.textContent = `${snap.size} ${snap.size === 1 ? "person" : "people"}`;
+        rows.replaceChildren(...snap.docs.map((doc) => {
+          const d = doc.data() || {};
+          const tr = document.createElement("tr");
+          for (const v of [d.email || "", GOALS[d.goal] || "—", d.joinedAt ? new Date(d.joinedAt).toLocaleDateString() : ""]) {
+            const td = document.createElement("td");
+            td.textContent = v;
+            tr.appendChild(td);
+          }
+          return tr;
+        }));
+        if (!snap.size) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 3;
+          td.textContent = "No signups yet. Share the page to start the list.";
+          tr.appendChild(td);
+          rows.replaceChildren(tr);
+        }
+      });
+    }
+  })();
+</script>

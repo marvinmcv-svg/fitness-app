@@ -67,3 +67,7 @@ npm run db:generate  # regenerate SQL migrations after editing src/db/schema.ts
 2. Next.js PWA shell (Serwist, SQLite WASM on OPFS, Wake Lock, rest-timer notifications) on top of this core.
 3. Strong/Hevy CSV import.
 4. Coach review of the exercise taxonomy, muscle factors and technique credit values.
+
+## Landing page
+
+`landing/` holds the marketing page: a hero with a waitlist form, a 57-second demo video recorded from the working app, feature sections and an FAQ. It's published as a claude.ai artifact, where the waitlist saves each signup privately and only the owner sees the list. To host it elsewhere, connect the form to a backend (for example, a Supabase `waitlist` table). `scripts/record-demo.mjs` re-records the demo after UI changes.
