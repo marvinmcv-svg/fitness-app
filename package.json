@@ -9,19 +9,30 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
-    "check": "npm run typecheck && npm test"
+    "check": "npm run typecheck && npm test",
+    "dev": "vite",
+    "build:app": "vite build",
+    "preview": "vite preview",
+    "build:artifact": "vite build && node scripts/to-artifact.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "drizzle-kit": "^0.31.11",
     "typescript": "^7.0.2",
+    "vite": "^8.3.2",
+    "vite-plugin-singlefile": "^2.3.3",
     "vitest": "^5.0.3"
   }
 }

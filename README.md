@@ -27,10 +27,30 @@ This repo currently contains the **storage-agnostic domain core** and the **Post
 - A program's template is stored as validated JSON in `programs.template`, so a program syncs and versions as a single row.
 - Weekly volume is computed client-side by `computeWeeklyVolume`, so it works offline. A server-side materialized view can come later for analytics.
 
-## Development
+## Run the app
 
 ```bash
 npm install
+npm run dev          # http://localhost:5173, also on your LAN so you can open it on a phone
+```
+
+The app (`app/`) is an iOS-style React UI on top of the domain core:
+
+- **Today**: next workout, rings for the weekly sets of each muscle, and muscles that are behind.
+- **Workout**: a set logger with "previous" values and progression suggestions. It has steppers for technique add-ons (partials, eccentrics), a rest timer and a screen wake lock.
+- **Program**: the 6-day rotation, plus a weekly plan check against your set targets.
+- **Progress**: sets per muscle against the target band, a 3-week activity chart and recent workouts.
+
+Data stays in `localStorage` on the device. The app opens with three weeks of sample history; reset or clear it under Profile.
+
+```bash
+npm run build:app       # dist/index.html: one self-contained file, works from file://
+npm run build:artifact  # dist/setwise.html: the same build as an Artifact page body
+```
+
+## Development
+
+```bash
 npm run check        # typecheck + tests
 npm run db:generate  # regenerate SQL migrations after editing src/db/schema.ts
 ```
