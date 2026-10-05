@@ -10,6 +10,8 @@ The user works in Claude Code on the web, where `localhost` on the container is 
    https://claude.ai/artifact/6pXqocA2bkFwHVk5Tr8v6L (pass it as `url`, after a `read`), so the
    side-panel preview updates in place. Then `open` it for the user.
 
+The live app is https://setwise-nine.vercel.app. Pushing to `claude/magical-euler-dv5ixk` redeploys it on Vercel (project `setwise`).
+
 Do not tell the user to open `localhost:5173` unless they are running `npm run dev` on their own computer.
 
 ## Layout

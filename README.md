@@ -27,6 +27,10 @@ This repo currently contains the **storage-agnostic domain core** and the **Post
 - A program's template is stored as validated JSON in `programs.template`, so a program syncs and versions as a single row.
 - Weekly volume is computed client-side by `computeWeeklyVolume`, so it works offline. A server-side materialized view can come later for analytics.
 
+## Live app
+
+https://setwise-nine.vercel.app (Vercel project `setwise`). Every push to `claude/magical-euler-dv5ixk`, the production branch, redeploys it. Open it on a phone and use **Add to Home Screen** to install it. It works offline after the first visit.
+
 ## Run the app
 
 ```bash
