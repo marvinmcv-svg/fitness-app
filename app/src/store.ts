@@ -1,13 +1,79 @@
 import { useCallback, useEffect, useState } from "react";
 import { EXERCISES, MUSCLES, TECHNIQUES } from "../../src/data/catalog";
-import { twiceWeeklyPrimerSplit } from "../../src/data/templates/twice-weekly-primer-split";
+import { TEMPLATES, templateBySlug } from "../../src/data/templates";
+import type { Activity, Macros, Sex } from "../../src/domain/nutrition";
+import { macroTargets } from "../../src/domain/nutrition";
+import {
+  personalizeTemplate,
+  type EquipmentProfile,
+  type Experience,
+  type Goal,
+  type PersonalizedTemplate,
+} from "../../src/domain/personalize";
 import { nextProgression, type ProgressionDecision, type SessionResult } from "../../src/domain/progression";
-import type { ProgramDay, ProgramTemplate, Slot } from "../../src/domain/template";
+import type { Slot } from "../../src/domain/template";
 import type { LoggedSet, VolumeTarget, Workout } from "../../src/domain/types";
 import { buildCatalog, computeWeeklyVolume } from "../../src/domain/volume";
 
 export const catalog = buildCatalog(EXERCISES, TECHNIQUES);
-export const program: ProgramTemplate = twiceWeeklyPrimerSplit;
+
+/* ---------------------------------------------------------------- profile */
+
+export interface Profile {
+  name: string;
+  goal: Goal;
+  experience: Experience;
+  daysPerWeek: number;
+  equipment: EquipmentProfile;
+  focusMuscles: string[];
+  sex: Sex;
+  age: number;
+  heightCm: number;
+  weightKg: number;
+  activity: Activity;
+  programSlug: string;
+  /** `${dayKey}:${slotIndex}` -> exercise slug */
+  swaps: Record<string, string>;
+}
+
+export function buildProgram(profile: Profile | null): PersonalizedTemplate {
+  const base = (profile && templateBySlug(profile.programSlug)) || TEMPLATES[0]!;
+  return personalizeTemplate(
+    base,
+    { equipment: profile?.equipment ?? "gym", focusMuscles: profile?.focusMuscles ?? [], swaps: profile?.swaps ?? {} },
+    catalog.exercises,
+  );
+}
+
+export const targetsMacros = (p: Profile | null): Macros | null => (p ? macroTargets(p, p.goal) : null);
+
+/** The member's personalized program. Reassigned by `setProgram` whenever the profile changes. */
+export let program: PersonalizedTemplate = buildProgram(null);
+export function setProgram(next: PersonalizedTemplate) {
+  program = next;
+}
+
+/* ------------------------------------------------------------------ macros */
+
+export type Meal = "breakfast" | "lunch" | "dinner" | "snack";
+export interface FoodEntry {
+  id: string;
+  eatenAt: string;
+  meal: Meal;
+  name: string;
+  brand?: string;
+  barcode?: string;
+  grams?: number;
+  source: "catalog" | "barcode" | "photo" | "manual";
+  macros: Macros;
+}
+
+export interface Account {
+  mode: "guest" | "member";
+  userId?: string;
+  email?: string;
+  name?: string;
+}
 export const muscleName = new Map(MUSCLES.map((m) => [m.slug, m.name]));
 export const exerciseName = (slug: string) => catalog.exercises.get(slug)?.name ?? slug;
 export const techniqueName = (slug: string) => catalog.techniques.get(slug)?.name ?? slug;
@@ -27,9 +93,10 @@ export const TRACKED_MUSCLES = [
   "calves",
 ] as const;
 
-export type TargetPreset = "standard" | "advanced";
+export type TargetPreset = "beginner" | "standard" | "advanced";
+export const PRESET_RANGE: Record<TargetPreset, [number, number]> = { beginner: [8, 14], standard: [10, 20], advanced: [12, 24] };
 export function targetsFor(preset: TargetPreset): VolumeTarget[] {
-  const [minSets, maxSets] = preset === "advanced" ? [12, 24] : [10, 20];
+  const [minSets, maxSets] = PRESET_RANGE[preset] ?? PRESET_RANGE.standard;
   return TRACKED_MUSCLES.map((muscle) => ({ muscle, minSets, maxSets, minFrequency: 2 }));
 }
 
@@ -62,7 +129,20 @@ export interface AppState {
   active: ActiveSession | null;
   preset: TargetPreset;
   sample: boolean;
+  account: Account | null;
+  profile: Profile | null;
+  food: FoodEntry[];
 }
+
+export const emptyState = (): AppState => ({
+  history: [],
+  active: null,
+  preset: "standard",
+  sample: false,
+  account: null,
+  profile: null,
+  food: [],
+});
 
 const KEY = "setwise:v1";
 let seq = 0;
@@ -71,7 +151,8 @@ export const uid = () => `${Date.now().toString(36)}-${(seq++).toString(36)}-${M
 function load(): AppState | null {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as AppState) : null;
+    // Older saves lack the account/profile/food fields.
+    return raw ? { ...emptyState(), ...(JSON.parse(raw) as Partial<AppState>) } : null;
   } catch {
     return null;
   }
@@ -86,7 +167,7 @@ function save(state: AppState) {
 }
 
 export function useAppState() {
-  const [state, setState] = useState<AppState>(() => load() ?? seedState());
+  const [state, setState] = useState<AppState>(() => load() ?? emptyState());
   useEffect(() => save(state), [state]);
   const update = useCallback((fn: (s: AppState) => AppState) => setState((s) => fn(s)), []);
   return [state, update] as const;
@@ -94,10 +175,19 @@ export function useAppState() {
 
 /* ----------------------------------------------------------------- helpers */
 
-export function dayByKey(key: string): ProgramDay {
+export function dayByKey(key: string): PersonalizedTemplate["days"][number] {
   const day = program.days.find((d) => d.key === key);
   if (!day) throw new Error(`Unknown day ${key}`);
   return day;
+}
+
+/** Label for a logged workout's day, even if it belongs to a program the member switched away from. */
+export function dayLabel(key: string): string {
+  for (const t of TEMPLATES) {
+    const d = t.days.find((x) => x.key === key);
+    if (d) return d.label;
+  }
+  return "Workout";
 }
 
 /** Next day in the rotation after the most recent programmed workout. */
@@ -245,7 +335,7 @@ export function seedState(): AppState {
     history.push(sampleWorkout(program.weekLayout[rotation % program.weekLayout.length]!, d, weekIndex));
     rotation++;
   }
-  return { history, active: null, preset: "standard", sample: true };
+  return { ...emptyState(), history, sample: true };
 }
 
 /* ------------------------------------------------------------ derived views */

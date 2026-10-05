@@ -15,7 +15,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { authenticatedRole, authUid } from "drizzle-orm/supabase";
+import { authenticatedRole, authUid, authUsers } from "drizzle-orm/supabase";
 import {
   MOVEMENT_PATTERNS,
   SET_TYPES,
@@ -36,6 +36,7 @@ export const muscleRegion = pgEnum("muscle_region", ["upper", "lower", "core"]);
 export const exerciseBias = pgEnum("exercise_bias", ["stretch", "shortened", "mid"]);
 export const weightUnit = pgEnum("weight_unit", ["kg", "lb"]);
 export const visibility = pgEnum("visibility", ["private", "unlisted", "public"]);
+export const mealType = pgEnum("meal_type", ["breakfast", "lunch", "dinner", "snack"]);
 
 /* ---------------------------------------------------------------- helpers */
 
@@ -254,4 +255,53 @@ export const setSegments = pgTable(
     weight: numeric("weight", { precision: 7, scale: 2, mode: "number" }),
   },
   (t) => [index("set_segments_set_idx").on(t.setId), ownRows("set_segments_own", t.userId)],
+).enableRLS();
+
+/* ------------------------------------------------------- members & macros */
+
+/** One row per member: onboarding answers, chosen program and personalization. */
+export const profiles = pgTable(
+  "profiles",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    displayName: text("display_name"),
+    // Questionnaire answers (goal, experience, days, equipment, focus, body stats).
+    answers: jsonb("answers").notNull().default(sql`'{}'::jsonb`),
+    programSlug: text("program_slug"),
+    // `${dayKey}:${slotIndex}` -> exercise slug
+    swaps: jsonb("swaps").notNull().default(sql`'{}'::jsonb`),
+    macroTargets: jsonb("macro_targets"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    pgPolicy("profiles_own", {
+      for: "all",
+      to: authenticatedRole,
+      using: sql`${t.id} = ${authUid}`,
+      withCheck: sql`${t.id} = ${authUid}`,
+    }),
+  ],
+).enableRLS();
+
+export const foodLogs = pgTable(
+  "food_logs",
+  {
+    ...synced,
+    eatenAt: timestamp("eaten_at", { withTimezone: true }).notNull(),
+    meal: mealType("meal").notNull(),
+    name: text("name").notNull(),
+    brand: text("brand"),
+    barcode: text("barcode"),
+    grams: numeric("grams", { precision: 7, scale: 1, mode: "number" }),
+    calories: numeric("calories", { precision: 7, scale: 1, mode: "number" }).notNull(),
+    protein: numeric("protein", { precision: 6, scale: 1, mode: "number" }).notNull(),
+    carbs: numeric("carbs", { precision: 6, scale: 1, mode: "number" }).notNull(),
+    fat: numeric("fat", { precision: 6, scale: 1, mode: "number" }).notNull(),
+    // catalog | barcode | photo | manual
+    source: text("source").notNull().default("manual"),
+  },
+  (t) => [index("food_logs_user_eaten_idx").on(t.userId, t.eatenAt), ownRows("food_logs_own", t.userId)],
 ).enableRLS();

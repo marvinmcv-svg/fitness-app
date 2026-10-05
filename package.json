@@ -19,6 +19,7 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "drizzle-orm": "^0.45.3",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

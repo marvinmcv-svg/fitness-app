@@ -11,10 +11,11 @@ import {
 } from "../store";
 import { Icon } from "../ui/Icon";
 import { Ring } from "../ui/Ring";
+import { initials } from "./Profile";
 
 export const SLOT_LABEL = { warmup: "Warm-up", primer: "Primer", corrective: "Corrective", main: "Main", accessory: "Accessory", burnout: "Burnout" } as const;
 
-export function Today({ state, onStart, onResume }: { state: AppState; onStart: (dayKey: string) => void; onResume: () => void }) {
+export function Today({ state, onStart, onResume, onProfile }: { state: AppState; onStart: (dayKey: string) => void; onResume: () => void; onProfile: () => void }) {
   const targets = targetsFor(state.preset);
   const { volume, workouts } = rollingVolume(state.history);
   const dayKey = state.active?.dayKey ?? nextDayKey(state.history);
@@ -27,6 +28,7 @@ export function Today({ state, onStart, onResume }: { state: AppState; onStart: 
   const weekPct = goalTotal ? doneTotal / goalTotal : 0;
   const behind = remainingSets(volume, targets).sort((a, b) => b.remaining - a.remaining);
 
+  const firstName = (state.profile?.name || state.account?.name || "").split(/\s+/)[0];
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const dateLabel = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -36,9 +38,14 @@ export function Today({ state, onStart, onResume }: { state: AppState; onStart: 
       <header className="large-title">
         <div className="lt-text">
           <p className="eyebrow">{dateLabel}</p>
-          <h1>{greeting}</h1>
+          <h1>
+            {greeting}
+            {firstName ? `, ${firstName}` : ""}
+          </h1>
         </div>
-        <div className="avatar" aria-label="Profile">MV</div>
+        <button className="avatar" onClick={onProfile} aria-label="Profile and settings">
+          {initials(state.profile?.name || state.account?.name || "")}
+        </button>
       </header>
 
       <section className="hero" aria-label="Next workout">

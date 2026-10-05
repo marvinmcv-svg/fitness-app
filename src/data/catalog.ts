@@ -96,4 +96,20 @@ export const EXERCISES: Exercise[] = [
   { slug: "lateral-raise", name: "Dumbbell lateral raise", equipment: ["dumbbell"], pattern: "isolation", bias: "mid", muscles: [p("side_delts")] },
   { slug: "cable-lateral-raise", name: "Cable lateral raise", equipment: ["cable"], pattern: "isolation", bias: "stretch", muscles: [p("side_delts")] },
   { slug: "rear-delt-fly", name: "Rear delt fly", equipment: ["dumbbell"], pattern: "isolation", bias: "shortened", muscles: [p("rear_delts")] },
+
+  // Dumbbell / home-friendly options used when a gym is not available
+  { slug: "db-row", name: "One-arm dumbbell row", equipment: ["dumbbell"], pattern: "horizontal_pull", bias: "stretch", muscles: [p("lats"), p("upper_back"), s("biceps"), s("rear_delts")] },
+  { slug: "db-floor-press", name: "Dumbbell floor press", equipment: ["dumbbell"], pattern: "horizontal_push", bias: "shortened", muscles: [p("chest"), s("triceps"), s("front_delts")] },
+  { slug: "db-romanian-deadlift", name: "Dumbbell Romanian deadlift", equipment: ["dumbbell"], pattern: "hinge", bias: "stretch", muscles: [p("hamstrings"), p("glutes"), s("spinal_erectors")] },
+  { slug: "bulgarian-split-squat", name: "Bulgarian split squat", equipment: ["dumbbell"], pattern: "knee_dominant", bias: "stretch", muscles: [p("quads"), p("glutes")] },
+  { slug: "glute-bridge", name: "Single-leg glute bridge", equipment: ["bodyweight"], pattern: "hinge", bias: "shortened", muscles: [p("glutes"), s("hamstrings")] },
+  { slug: "pike-pushup", name: "Pike push-up", equipment: ["bodyweight"], pattern: "vertical_push", bias: "mid", muscles: [p("front_delts"), s("triceps"), s("side_delts", 0.25)] },
+  { slug: "single-leg-calf-raise", name: "Single-leg calf raise", equipment: ["bodyweight"], pattern: "isolation", bias: "stretch", muscles: [p("calves")] },
+  { slug: "db-overhead-extension", name: "Dumbbell overhead extension", equipment: ["dumbbell"], pattern: "isolation", bias: "stretch", muscles: [p("triceps")] },
+  { slug: "band-row", name: "Band row", equipment: ["band"], pattern: "horizontal_pull", bias: "shortened", muscles: [p("upper_back"), s("lats"), s("biceps"), s("rear_delts")] },
+  { slug: "band-face-pull", name: "Band face pull", equipment: ["band"], pattern: "horizontal_pull", bias: "shortened", muscles: [p("rear_delts"), s("rotator_cuff"), s("traps")] },
+  { slug: "nordic-curl", name: "Nordic hamstring curl", equipment: ["bodyweight"], pattern: "isolation", bias: "stretch", muscles: [p("hamstrings")] },
+  { slug: "plank", name: "Plank", equipment: ["bodyweight"], pattern: "core", bias: "mid", muscles: [p("abs")] },
+  { slug: "hanging-knee-raise", name: "Hanging knee raise", equipment: ["bodyweight", "bar"], pattern: "core", bias: "mid", muscles: [p("abs")] },
+  { slug: "cable-crunch", name: "Cable crunch", equipment: ["cable"], pattern: "core", bias: "shortened", muscles: [p("abs")] },
 ];

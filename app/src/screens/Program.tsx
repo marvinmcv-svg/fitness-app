@@ -1,13 +1,25 @@
 import { useMemo, useState } from "react";
+import { TEMPLATES, templateBySlug } from "../../../src/data/templates";
+import { swapOptions, type PersonalizedSlot } from "../../../src/domain/personalize";
 import { checkPlan, projectWeek } from "../../../src/domain/planner";
 import { catalog, dayByKey, exerciseName, muscleName, nextDayKey, program, targetsFor, techniqueName, type AppState } from "../store";
 import { Icon } from "../ui/Icon";
 import { fmt, SLOT_LABEL } from "./Today";
 
-export function Program({ state, onStart }: { state: AppState; onStart: (dayKey: string) => void }) {
+interface Props {
+  state: AppState;
+  onStart: (dayKey: string) => void;
+  onChangeProgram: (slug: string) => void;
+  onSwap: (dayKey: string, baseIndex: number, exercise: string | null) => void;
+}
+
+export function Program({ state, onStart, onChangeProgram, onSwap }: Props) {
   const upNext = state.active?.dayKey ?? nextDayKey(state.history);
-  const [selected, setSelected] = useState(upNext);
+  const [picked, setSelected] = useState(upNext);
+  const selected = program.days.some((d) => d.key === picked) ? picked : upNext;
   const day = dayByKey(selected);
+  const [sheet, setSheet] = useState<"programs" | { slot: PersonalizedSlot } | null>(null);
+  const equipment = state.profile?.equipment ?? "gym";
   const targets = targetsFor(state.preset);
 
   const { planned, warnings } = useMemo(() => {
@@ -22,6 +34,9 @@ export function Program({ state, onStart }: { state: AppState; onStart: (dayKey:
           <p className="eyebrow">Your program</p>
           <h1>{program.name}</h1>
         </div>
+        <button className="btn-small" onClick={() => setSheet("programs")} disabled={!!state.active}>
+          Change
+        </button>
       </header>
 
       <div className="day-strip" role="tablist" aria-label="Training days">
@@ -58,9 +73,17 @@ export function Program({ state, onStart }: { state: AppState; onStart: (dayKey:
             const ex = catalog.exercises.get(slot.exercise)!;
             return (
               <li className="row row-top" key={i}>
+                <button className="row-btn row-top" onClick={() => setSheet({ slot })} aria-label={`Swap ${exerciseName(slot.exercise)}`}>
                 <span className={`slot-badge slot-${slot.slotType}`}>{SLOT_LABEL[slot.slotType]}</span>
                 <span className="row-text">
-                  <span className="row-title">{exerciseName(slot.exercise)}</span>
+                  <span className="row-title">
+                    {exerciseName(slot.exercise)}
+                    {slot.change && (
+                      <span className={`change-tag change-${slot.change}`}>
+                        {slot.change === "swap" ? "Your pick" : slot.change === "equipment" ? "For your equipment" : "+1 set focus"}
+                      </span>
+                    )}
+                  </span>
                   <span className="row-sub">
                     {slot.sets.min === slot.sets.max ? slot.sets.max : `${slot.sets.min}–${slot.sets.max}`} ×{" "}
                     {slot.reps ? (slot.reps.min === slot.reps.max ? slot.reps.max : `${slot.reps.min}–${slot.reps.max}`) : "failure"}
@@ -82,10 +105,13 @@ export function Program({ state, onStart }: { state: AppState; onStart: (dayKey:
                     ))}
                   </span>
                 </span>
+                <Icon name="swap" size={18} className="row-chevron" />
+                </button>
               </li>
             );
           })}
         </ul>
+        <p className="muted small footnote">Tap an exercise to swap it for one that suits you.</p>
       </section>
 
       <section className="group">
@@ -141,6 +167,90 @@ export function Program({ state, onStart }: { state: AppState; onStart: (dayKey:
         </div>
         <p className="muted small footnote">Secondary muscles count as half a set. Primer work is excluded.</p>
       </section>
+
+      {sheet === "programs" && (
+        <div className="sheet-backdrop" onClick={() => setSheet(null)}>
+          <div className="sheet sheet-tall" role="dialog" aria-label="Choose a program" onClick={(e) => e.stopPropagation()}>
+            <span className="sheet-grabber" aria-hidden="true" />
+            <h3>Choose a program</h3>
+            <p className="muted">Your exercise swaps reset when you switch. Logged workouts stay.</p>
+            <div className="plan-cards">
+              {TEMPLATES.map((t) => (
+                <button
+                  key={t.slug}
+                  className={`plan-card${program.slug === t.slug ? " on" : ""}`}
+                  aria-pressed={program.slug === t.slug}
+                  onClick={() => {
+                    if (t.slug !== program.slug) onChangeProgram(t.slug);
+                    setSheet(null);
+                  }}
+                >
+                  <span className="plan-card-top">
+                    <strong>{t.name}</strong>
+                    {program.slug === t.slug && <span className="pill">Current</span>}
+                  </span>
+                  <span className="plan-card-body">{t.description}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {sheet && sheet !== "programs" && (
+        <SwapSheet
+          slot={sheet.slot}
+          dayKey={day.key}
+          equipment={equipment}
+          onClose={() => setSheet(null)}
+          onPick={(exercise) => {
+            onSwap(day.key, sheet.slot.baseIndex, exercise);
+            setSheet(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function SwapSheet({
+  slot,
+  dayKey,
+  equipment,
+  onClose,
+  onPick,
+}: {
+  slot: PersonalizedSlot;
+  dayKey: string;
+  equipment: "gym" | "dumbbells" | "home";
+  onClose: () => void;
+  onPick: (exercise: string | null) => void;
+}) {
+  const base = templateBySlug(program.slug)!.days.find((d) => d.key === dayKey)!.slots[slot.baseIndex]!;
+  const options = swapOptions(base, catalog.exercises, equipment);
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet sheet-tall" role="dialog" aria-label="Swap exercise" onClick={(e) => e.stopPropagation()}>
+        <span className="sheet-grabber" aria-hidden="true" />
+        <h3>Swap {exerciseName(slot.exercise)}</h3>
+        <p className="muted">Same movement and muscles, so your plan stays balanced.</p>
+        <ul className="list card">
+          {options.map((o) => (
+            <li className="row" key={o.slug}>
+              <button className="row-btn" onClick={() => onPick(o.slug === base.exercise ? null : o.slug)}>
+                <span className="row-text">
+                  <span className="row-title">
+                    {o.name}
+                    {o.slug === base.exercise && <span className="change-tag">Program default</span>}
+                  </span>
+                  <span className="row-sub">{o.equipment.join(", ").replace(/_/g, " ")}</span>
+                </span>
+                {o.slug === slot.exercise && <Icon name="check" size={18} stroke={2.6} className="text-accent" />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

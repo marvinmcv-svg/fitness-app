@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { dayByKey, muscleName, rollingVolume, targetsFor, tonnage, workingSets, type AppState } from "../store";
+import { dayLabel, muscleName, rollingVolume, targetsFor, tonnage, workingSets, type AppState } from "../store";
 import { fmt } from "./Today";
 
 export function Progress({ state }: { state: AppState }) {
@@ -135,7 +135,7 @@ export function Progress({ state }: { state: AppState }) {
                   <strong>{new Date(w.startedAt).getDate()}</strong>
                 </span>
                 <span className="row-text">
-                  <span className="row-title">{w.programDayId ? dayByKey(w.programDayId).label : "Freestyle"}</span>
+                  <span className="row-title">{w.programDayId ? dayLabel(w.programDayId) : "Freestyle"}</span>
                   <span className="row-sub">
                     {workingSets(w)} sets · {(tonnage(w) / 1000).toFixed(1)} t
                     {w.endedAt ? ` · ${Math.round((+new Date(w.endedAt) - +new Date(w.startedAt)) / 60000)} min` : ""}
@@ -143,6 +143,11 @@ export function Progress({ state }: { state: AppState }) {
                 </span>
               </li>
             ))}
+          {state.history.length === 0 && (
+            <li className="row">
+              <span className="row-sub">No workouts yet. Start your first one from Today.</span>
+            </li>
+          )}
         </ul>
       </section>
     </div>

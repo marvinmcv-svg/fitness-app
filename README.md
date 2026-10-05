@@ -41,7 +41,13 @@ The app (`app/`) is an iOS-style React UI on top of the domain core:
 - **Program**: the 6-day rotation, plus a weekly plan check against your set targets.
 - **Progress**: sets per muscle against the target band, a 3-week activity chart and recent workouts.
 
-Data stays in `localStorage` on the device. The app opens with three weeks of sample history; reset or clear it under Profile.
+New members land on a welcome page:
+- **Sign up:** with Google or email (Supabase Auth), or try it as a guest.
+- **Questionnaire:** goal, experience, days per week, equipment, focus muscles and body stats.
+- **Personalized program:** the questionnaire recommends a program (Full Body 3×, Upper / Lower, or the 6-day split). It swaps in exercises that fit the member's equipment and adds a set for each focus muscle. Members can switch programs or swap any exercise from the Program tab.
+- **Macros:** daily calorie and protein/carb/fat targets come from the questionnaire. Members log food with the camera (an AI photo estimate, or a barcode looked up on Open Food Facts), by searching built-in foods, or with quick add.
+
+Guests' data stays in `localStorage`. With Supabase connected, members' profiles and meals sync to their account. Setup steps are in [`docs/BACKEND_SETUP.md`](docs/BACKEND_SETUP.md).
 
 ```bash
 npm run build:app       # dist/index.html: one self-contained file, works from file://
