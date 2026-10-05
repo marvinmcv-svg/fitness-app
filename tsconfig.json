@@ -27,6 +27,7 @@
     "app/src",
     "drizzle.config.ts",
     "vitest.config.ts",
-    "vite.config.ts"
+    "vite.config.ts",
+    "api"
   ]
 }

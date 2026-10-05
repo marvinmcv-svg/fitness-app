@@ -38,3 +38,19 @@ Only signed-in members can call it: the platform verifies their JWT. Barcode sca
 
 - Google sign-in redirects through Supabase, so it needs a real URL. It does not work inside the claude.ai preview panel, which also blocks network calls to Supabase. Use the preview to try the app as a guest; test sign-in on a deployed URL or locally with `npm run dev`.
 - Workouts are still saved on the device only. Profiles and meals sync for members.
+
+## 4. AI coach
+
+The coach has two parts:
+
+- **Rules-based coaching** works with no setup, offline and free: the daily brief on Today, the readiness check before each workout, the post-workout summary with personal records, the weekly review, and safety replies for red-flag messages.
+- **Chat coach (Claude)**: runs through the Vercel Function `api/coach.ts`. To turn it on:
+  1. Create an API key at console.anthropic.com. Set a monthly spend limit there.
+  2. In Vercel, open **setwise → Settings → Environment Variables** and add `ANTHROPIC_API_KEY`, for Production and Preview.
+  3. Redeploy (or push any commit).
+
+Until the key is set, the chat shows "The AI coach isn't connected yet" and everything else keeps working.
+
+The function only answers requests from the app's own domain. It allows 30 requests per IP per hour on each server instance, and caps message and context size. Those limits are a speed bump, not real protection: anyone can call a public endpoint. Before a public launch, require a signed-in Supabase session in `api/coach.ts`, and keep the spend limit on your Anthropic key.
+
+Cost: each question uses Claude Opus 5.5 at medium effort. That's about 8–10k input tokens of instructions and athlete data, mostly cached, plus a short reply: roughly 1–3 US cents per question at current prices.

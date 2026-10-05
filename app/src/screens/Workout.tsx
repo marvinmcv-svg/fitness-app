@@ -23,9 +23,11 @@ interface Props {
   onMinimize: () => void;
   onFinish: () => void;
   onDiscard: () => void;
+  onCoach: (prompt?: string) => void;
 }
 
-export function Workout({ session, history, onChange, onMinimize, onFinish, onDiscard }: Props) {
+export function Workout({ session, history, onChange, onMinimize, onFinish, onDiscard, onCoach }: Props) {
+  const [coachOpen, setCoachOpen] = useState(true);
   const day = dayByKey(session.dayKey);
   const [rest, setRest] = useState<{ endsAt: number; total: number } | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -78,6 +80,27 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
       </div>
 
       <div className="wk-scroll">
+        {coachOpen && (session.coachNotes?.length || session.effortCue) ? (
+          <section className="coach-banner" aria-label="Coach notes">
+            <span className="coach-avatar" aria-hidden="true">
+              <Icon name="sparkle" size={16} stroke={2.2} />
+            </span>
+            <div className="coach-banner-text">
+              {session.coachNotes?.map((n, i) => <p key={i}>{n}</p>)}
+              {session.effortCue && <p className="coach-cue">{session.effortCue}</p>}
+              <button className="link-btn" onClick={() => onCoach()}>
+                Ask coach <Icon name="chevron" size={14} />
+              </button>
+            </div>
+            <button className="row-del" onClick={() => setCoachOpen(false)} aria-label="Hide coach notes">
+              <Icon name="close" size={14} />
+            </button>
+          </section>
+        ) : (
+          <button className="coach-pill" onClick={() => onCoach()}>
+            <Icon name="sparkle" size={15} /> Ask coach mid-workout
+          </button>
+        )}
         {session.exercises.map((ex) => {
           const slot = day.slots[ex.slotIndex]!;
           const prev = exerciseHistory(history, ex.exercise).at(-1);

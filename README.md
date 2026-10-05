@@ -51,6 +51,15 @@ New members land on a welcome page:
 - **Personalized program:** the questionnaire recommends a program (Full Body 3×, Upper / Lower, or the 6-day split). It swaps in exercises that fit the member's equipment and adds a set for each focus muscle. Members can switch programs or swap any exercise from the Program tab.
 - **Macros:** daily calorie and protein/carb/fat targets come from the questionnaire. Members log food with the camera (an AI photo estimate, or a barcode looked up on Open Food Facts), by searching built-in foods, or with quick add.
 
+**AI coach:**
+- **Daily brief:** stalled lifts, muscles behind target, new records, protein left today.
+- **Readiness check:** before each workout, it trims the session for poor sleep, low energy, sore muscles or limited time.
+- **Workout summary:** after each workout, with personal records.
+- **Weekly review.**
+- **Chat coach (Claude):** reads your program, training and meals. It proposes swaps, program changes, target changes and food logs as cards you approve, and remembers injuries and preferences.
+
+The rules live in `src/domain/coach.ts` and the chat spec in `src/coach/spec.ts`. The server function is `api/coach.ts`.
+
 Guests' data stays in `localStorage`. With Supabase connected, members' profiles and meals sync to their account. Setup steps are in [`docs/BACKEND_SETUP.md`](docs/BACKEND_SETUP.md).
 
 ```bash

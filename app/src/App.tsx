@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { swapKey } from "../../src/domain/personalize";
+import type { CoachAction } from "../../src/coach/spec";
+import { adjustSession, type Readiness } from "../../src/domain/coach";
+import { swapKey, swapOptions } from "../../src/domain/personalize";
+import { templateBySlug } from "../../src/data/templates";
 import * as cloud from "./cloud";
+import { Coach } from "./screens/Coach";
+import { plannedSlots, ReadinessSheet, WorkoutSummary } from "./screens/CoachSheets";
 import { Macros } from "./screens/Macros";
 import { Onboarding } from "./screens/Onboarding";
 import { Profile } from "./screens/Profile";
@@ -19,6 +24,8 @@ import {
   targetsMacros,
   useAppState,
   workingSets,
+  catalog,
+  uid,
   type AppState,
   type Profile as MemberProfile,
   type TargetPreset,
@@ -44,6 +51,9 @@ export function App() {
   const [editingAnswers, setEditingAnswers] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [coach, setCoach] = useState<{ prompt?: string } | null>(null);
+  const [readinessFor, setReadinessFor] = useState<string | null>(null);
+  const [summary, setSummary] = useState<{ workout: ReturnType<typeof finishSession>; before: AppState["history"] } | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -132,15 +142,75 @@ export function App() {
 
   const profile = state.profile;
   const start = (dayKey: string) => {
-    update((s) => ({ ...s, active: s.active ?? startSession(s.history, dayKey) }));
+    if (state.active) return setShowWorkout(true);
+    setReadinessFor(dayKey);
+  };
+
+  const beginSession = (dayKey: string, readiness: Readiness | null) => {
+    update((s) => {
+      if (s.active) return s;
+      const session = startSession(s.history, dayKey);
+      if (!readiness) return { ...s, active: session };
+      const adj = adjustSession(plannedSlots(dayKey), readiness);
+      const exercises = session.exercises
+        .filter((_, i) => adj.slots[i]?.keep !== false)
+        .map((ex) => {
+          const target = adj.slots[ex.slotIndex]?.sets ?? ex.sets.length;
+          return { ...ex, sets: ex.sets.slice(0, Math.max(1, target)) };
+        });
+      return { ...s, active: { ...session, exercises, coachNotes: adj.notes, effortCue: adj.effortCue } };
+    });
+    setReadinessFor(null);
     setShowWorkout(true);
+  };
+
+  const applyCoachAction = (a: CoachAction): string | null => {
+    switch (a.type) {
+      case "swap_exercise": {
+        const base = templateBySlug(profile.programSlug)?.days.find((d) => d.key === a.day_key)?.slots[a.slot_index];
+        if (!base || !swapOptions(base, catalog.exercises, profile.equipment).some((e) => e.slug === a.exercise)) {
+          return "That swap doesn't fit your equipment or program anymore.";
+        }
+        const swaps = { ...profile.swaps, [swapKey(a.day_key, a.slot_index)]: a.exercise };
+        saveProfile({ ...profile, swaps });
+        setToast("Exercise swapped");
+        return null;
+      }
+      case "change_program":
+        if (state.active) return "Finish your current workout before switching programs.";
+        if (!templateBySlug(a.program_slug)) return "That program doesn't exist.";
+        saveProfile({ ...profile, programSlug: a.program_slug, swaps: {} });
+        setToast("Program switched");
+        return null;
+      case "set_volume_targets":
+        update((s) => ({ ...s, preset: a.preset }));
+        setToast("Weekly targets updated");
+        return null;
+      case "log_food": {
+        const entry = {
+          id: crypto.randomUUID?.() ?? uid(),
+          eatenAt: new Date().toISOString(),
+          meal: a.meal,
+          name: a.name,
+          grams: a.grams || undefined,
+          source: "coach" as const,
+          macros: { calories: Math.round(a.calories), protein: a.protein, carbs: a.carbs, fat: a.fat },
+        };
+        update((s) => ({ ...s, food: [...s.food, entry] }));
+        if (member) void cloud.saveFood(member, entry);
+        setToast(`Logged ${entry.macros.calories} kcal`);
+        return null;
+      }
+      case "remember":
+        return null;
+    }
   };
   const center = () => (state.active ? setShowWorkout(true) : start(nextDayKey(state.history)));
 
   return (
     <Frame>
       <main className="viewport">
-        {tab === "today" && <Today state={state} onStart={start} onResume={() => setShowWorkout(true)} onProfile={() => setTab("profile")} />}
+        {tab === "today" && <Today state={state} onStart={start} onResume={() => setShowWorkout(true)} onProfile={() => setTab("profile")} onCoach={(prompt) => setCoach({ prompt })} />}
         {tab === "program" && (
           <Program
             state={state}
@@ -227,13 +297,41 @@ export function App() {
             setShowWorkout(false);
             setToast("Workout discarded");
           }}
+          onCoach={(prompt) => setCoach({ prompt })}
           onFinish={() => {
             const w = finishSession(state.active!);
+            const before = state.history;
             update((s) => ({ ...s, active: null, history: [...s.history, w] }));
             setShowWorkout(false);
             setTab("today");
-            setToast(`Workout saved · ${workingSets(w)} working sets`);
+            setSummary({ workout: w, before });
           }}
+        />
+      )}
+
+      {readinessFor && <ReadinessSheet dayKey={readinessFor} onStart={(r) => beginSession(readinessFor, r)} onClose={() => setReadinessFor(null)} />}
+
+      {summary && (
+        <WorkoutSummary
+          workout={summary.workout}
+          before={summary.before}
+          onClose={() => setSummary(null)}
+          onAskCoach={() => {
+            setSummary(null);
+            setCoach({ prompt: "I just finished my workout. How did it go, and what should I focus on next time?" });
+          }}
+        />
+      )}
+
+      {coach && (
+        <Coach
+          state={state}
+          initialPrompt={coach.prompt}
+          onClose={() => setCoach(null)}
+          onMessages={(fn) => update((s) => ({ ...s, coach: { ...s.coach, chat: fn(s.coach.chat).slice(-60) } }))}
+          onApply={applyCoachAction}
+          onRemember={(note) => update((s) => ({ ...s, coach: { ...s.coach, memory: [...s.coach.memory, { id: uid(), note: note.slice(0, 160), at: new Date().toISOString() }].slice(-30) } }))}
+          onForget={(id) => update((s) => ({ ...s, coach: { ...s.coach, memory: s.coach.memory.filter((m) => m.id !== id) } }))}
         />
       )}
 

@@ -11,6 +11,7 @@ import {
   type PersonalizedTemplate,
 } from "../../src/domain/personalize";
 import { nextProgression, type ProgressionDecision, type SessionResult } from "../../src/domain/progression";
+import type { CoachAction } from "../../src/coach/spec";
 import type { Slot } from "../../src/domain/template";
 import type { LoggedSet, VolumeTarget, Workout } from "../../src/domain/types";
 import { buildCatalog, computeWeeklyVolume } from "../../src/domain/volume";
@@ -64,7 +65,7 @@ export interface FoodEntry {
   brand?: string;
   barcode?: string;
   grams?: number;
-  source: "catalog" | "barcode" | "photo" | "manual";
+  source: "catalog" | "barcode" | "photo" | "manual" | "coach";
   macros: Macros;
 }
 
@@ -122,6 +123,24 @@ export interface ActiveSession {
   dayKey: string;
   startedAt: string;
   exercises: DraftExercise[];
+  /** What the coach changed from the plan after the readiness check, if anything. */
+  coachNotes?: string[];
+  effortCue?: string;
+}
+
+export interface CoachMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  at: string;
+  /** Actions the coach proposed in this reply, with what the athlete did. */
+  actions?: { action: CoachAction; status: "pending" | "applied" | "dismissed" }[];
+  safety?: boolean;
+}
+
+export interface CoachState {
+  memory: { id: string; note: string; at: string }[];
+  chat: CoachMessage[];
 }
 
 export interface AppState {
@@ -132,6 +151,7 @@ export interface AppState {
   account: Account | null;
   profile: Profile | null;
   food: FoodEntry[];
+  coach: CoachState;
 }
 
 export const emptyState = (): AppState => ({
@@ -142,6 +162,7 @@ export const emptyState = (): AppState => ({
   account: null,
   profile: null,
   food: [],
+  coach: { memory: [], chat: [] },
 });
 
 const KEY = "setwise:v1";
@@ -297,7 +318,8 @@ function sampleWorkout(dayKey: string, date: Date, weekIndex: number): Workout {
     endedAt: new Date(date.getTime() + 62 * 60_000).toISOString(),
     programDayId: dayKey,
     exercises: day.slots.map((slot, ordinal) => {
-      const base = BASE[slot.exercise] ?? 0;
+      const bodyweight = catalog.exercises.get(slot.exercise)?.equipment.includes("bodyweight") ?? false;
+      const base = BASE[slot.exercise] ?? (bodyweight ? 0 : 20);
       const weight = base ? base + weekIndex * 2.5 : null;
       const top = slot.reps?.max ?? 12;
       const n = slot.sets.max;

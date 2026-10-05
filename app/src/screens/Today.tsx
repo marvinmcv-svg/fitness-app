@@ -1,6 +1,13 @@
-import { remainingSets } from "../../../src/domain/planner";
+import { useMemo } from "react";
+import { dailyInsights } from "../../../src/domain/coach";
+import { sumMacros } from "../../../src/domain/nutrition";
+import type { SessionResult } from "../../../src/domain/progression";
 import {
+  catalog,
   dayByKey,
+  exerciseHistory,
+  program,
+  targetsMacros,
   exerciseName,
   muscleName,
   nextDayKey,
@@ -15,7 +22,15 @@ import { initials } from "./Profile";
 
 export const SLOT_LABEL = { warmup: "Warm-up", primer: "Primer", corrective: "Corrective", main: "Main", accessory: "Accessory", burnout: "Burnout" } as const;
 
-export function Today({ state, onStart, onResume, onProfile }: { state: AppState; onStart: (dayKey: string) => void; onResume: () => void; onProfile: () => void }) {
+interface Props {
+  state: AppState;
+  onStart: (dayKey: string) => void;
+  onResume: () => void;
+  onProfile: () => void;
+  onCoach: (prompt?: string) => void;
+}
+
+export function Today({ state, onStart, onResume, onProfile, onCoach }: Props) {
   const targets = targetsFor(state.preset);
   const { volume, workouts } = rollingVolume(state.history);
   const dayKey = state.active?.dayKey ?? nextDayKey(state.history);
@@ -26,7 +41,24 @@ export function Today({ state, onStart, onResume, onProfile }: { state: AppState
   const goalTotal = targets.reduce((n, t) => n + t.minSets, 0);
   const doneTotal = targets.reduce((n, t) => n + Math.min(t.minSets, volume.get(t.muscle)?.effectiveSets ?? 0), 0);
   const weekPct = goalTotal ? doneTotal / goalTotal : 0;
-  const behind = remainingSets(volume, targets).sort((a, b) => b.remaining - a.remaining);
+  const insights = useMemo(() => {
+    const now = new Date();
+    const lifts = new Map<string, SessionResult[]>();
+    for (const d of program.days) for (const sl of d.slots) if (sl.slotType === "main") lifts.set(sl.exercise, exerciseHistory(state.history, sl.exercise));
+    return dailyInsights({
+      now,
+      history: state.history,
+      volume,
+      targets,
+      nextDayMuscles: [...new Set(day.slots.flatMap((sl) => catalog.exercises.get(sl.exercise)?.muscles.filter((m) => m.role === "primary").map((m) => m.muscle) ?? []))],
+      nextDayLabel: day.label,
+      eatenToday: sumMacros(state.food.filter((f) => new Date(f.eatenAt).toDateString() === now.toDateString()).map((f) => f.macros)),
+      macroTargets: targetsMacros(state.profile),
+      liftHistory: lifts,
+      names: { muscle: (m) => muscleName.get(m) ?? m, exercise: exerciseName },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.history, state.food, state.profile, state.preset, dayKey]);
 
   const firstName = (state.profile?.name || state.account?.name || "").split(/\s+/)[0];
   const hour = new Date().getHours();
@@ -44,7 +76,7 @@ export function Today({ state, onStart, onResume, onProfile }: { state: AppState
           </h1>
         </div>
         <button className="avatar" onClick={onProfile} aria-label="Profile and settings">
-          {initials(state.profile?.name || state.account?.name || "")}
+          {(state.profile?.name || state.account?.name) ? initials(state.profile?.name || state.account?.name || "") : <Icon name="person" size={20} />}
         </button>
       </header>
 
@@ -99,26 +131,39 @@ export function Today({ state, onStart, onResume, onProfile }: { state: AppState
         </div>
       </section>
 
-      {behind.length > 0 && (
-        <section className="group">
-          <div className="group-head">
-            <h3>Behind this week</h3>
+      <section className="card coach-brief" aria-label="Coach brief">
+        <div className="coach-brief-head">
+          <span className="coach-avatar" aria-hidden="true">
+            <Icon name="sparkle" size={18} stroke={2.2} />
+          </span>
+          <div>
+            <p className="coach-brief-title">Coach</p>
+            <p className="muted small">Your brief for today</p>
           </div>
-          <ul className="list card">
-            {behind.slice(0, 3).map((b) => (
-              <li className="row" key={b.muscle}>
-                <span className="row-icon tone-warn">
-                  <Icon name="bolt" size={18} />
-                </span>
-                <span className="row-text">
-                  <span className="row-title">{muscleName.get(b.muscle)}</span>
-                  <span className="row-sub">{fmt(b.remaining)} more {b.remaining === 1 ? "set" : "sets"} to reach your minimum</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+          <button className="btn-small accent" onClick={() => onCoach()}>
+            Ask
+          </button>
+        </div>
+        <ul className="insights">
+          {insights.map((i) => (
+            <li key={i.id} className={`insight tone-${i.tone}`}>
+              <strong>{i.title}</strong>
+              <span>{i.body}</span>
+            </li>
+          ))}
+          {!insights.length && (
+            <li className="insight tone-info">
+              <strong>All set for {day.label}</strong>
+              <span>Tap Start and I'll check in on your sleep, energy and time first.</span>
+            </li>
+          )}
+        </ul>
+        {insights[0] && (
+          <button className="link-btn" onClick={() => onCoach(`About "${insights[0]!.title}": what should I do?`)}>
+            Ask about this <Icon name="chevron" size={16} />
+          </button>
+        )}
+      </section>
 
       <section className="group">
         <div className="group-head">
