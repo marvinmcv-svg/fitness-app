@@ -1,643 +1,1350 @@
-<title>Setwise</title>
-<meta name="description" content="Setwise is the training log that understands how you train: a personalized program, weekly sets per muscle, and macros from a photo. Join the waitlist." />
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FuerzaFlow · Strength that flows with you</title>
+<meta name="description" content="FuerzaFlow builds your training program, adjusts every workout to how you feel, tracks macros from a photo and coaches you with AI, in your language. Free to try." />
+<meta property="og:title" content="FuerzaFlow · Strength that flows with you" />
+<meta property="og:description" content="A personal program, an AI coach that adjusts every workout, and macros from a photo. In 6 languages." />
+<meta property="og:image" content="/poster.jpg" />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#0b0912" />
+<link rel="icon" type="image/png" href="/app/icons/favicon-64.png" />
+<link rel="apple-touch-icon" href="/app/icons/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" />
 <style>
-  /* Layout: a dark training-floor hero (phone playing the real demo + waitlist form),
-     then light sections that each pair one claim with one real screen from the app. */
+  /* Layout: a night-dark hero (live demo in a phone, floating UI chips, flowing
+     ribbons), then a scroll-told day with the app, the coach, a live theme
+     switcher that recolors this page, languages, the full demo, and the waitlist.
+     Motion: CSS for loops, IntersectionObserver for reveals, rAF for scroll/pointer.
+     Everything settles to its final state under prefers-reduced-motion. */
   :root {
-    --bg: #f4f3f9;
-    --surface: #ffffff;
-    --ink: #17142a;
-    --ink-2: #4a4662;
-    --muted: #77738c;
-    --line: rgba(23, 20, 42, 0.1);
     --accent: #6447f0;
-    --accent-ink: #ffffff;
-    --accent-soft: #ebe7ff;
-    --night: #150f26;
-    --night-2: #241a45;
-    --night-ink: #f6f4ff;
-    --night-muted: rgba(246, 244, 255, 0.66);
-    --night-line: rgba(255, 255, 255, 0.12);
-    --lilac: #b3a4ff;
-    --teal: #19b3a6;
-    --amber: #e9a23b;
-    --rose: #e5517f;
-    --good: #1ea672;
-    --danger: #d9465b;
+    --accent-2: #b06bff;
+    --accent-soft: #ece8ff;
+    --bg: #f6f5fb;
+    --surface: #ffffff;
+    --surface-2: #efedf7;
+    --ink: #15121f;
+    --ink-2: #474359;
+    --muted: #767189;
+    --line: rgba(21, 18, 31, 0.1);
+    --night: #0b0912;
+    --night-2: #16112a;
+    --night-ink: #f5f3ff;
+    --night-muted: rgba(245, 243, 255, 0.64);
+    --night-line: rgba(255, 255, 255, 0.1);
+    --glass: rgba(24, 20, 40, 0.62);
+    --good: #18a46b;
+    --warn: #e39a2a;
+    --protein: #e0457b;
+    --carbs: #12a3a3;
+    --fat: #e59a14;
 
-    --display: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
+    --display: "Archivo", "Plus Jakarta Sans", system-ui, sans-serif;
     --body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
-    --wrap: 1120px;
+    --wrap: 1180px;
     --gutter: clamp(16px, 4vw, 40px);
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #0d0b16;
-      --surface: #181527;
-      --ink: #f2f0fb;
-      --ink-2: #c8c4dc;
-      --muted: #9a96b2;
-      --line: rgba(255, 255, 255, 0.1);
-      --accent: #8b75ff;
-      --accent-soft: #261f47;
-      --night: #120d22;
-      --night-2: #2a1f52;
-      --good: #35c98d;
-      --danger: #ff6b80;
+      --accent-soft: #221c3d;
+      --bg: #0e0c16;
+      --surface: #17141f;
+      --surface-2: #1f1b2b;
+      --ink: #f2f0fa;
+      --ink-2: #c7c3d8;
+      --muted: #9792ab;
+      --line: rgba(255, 255, 255, 0.09);
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #0d0b16;
-    --surface: #181527;
-    --ink: #f2f0fb;
-    --ink-2: #c8c4dc;
-    --muted: #9a96b2;
-    --line: rgba(255, 255, 255, 0.1);
-    --accent: #8b75ff;
-    --accent-soft: #261f47;
-    --night: #120d22;
-    --night-2: #2a1f52;
-    --good: #35c98d;
-    --danger: #ff6b80;
+    --accent-soft: #221c3d;
+    --bg: #0e0c16;
+    --surface: #17141f;
+    --surface-2: #1f1b2b;
+    --ink: #f2f0fa;
+    --ink-2: #c7c3d8;
+    --muted: #9792ab;
+    --line: rgba(255, 255, 255, 0.09);
     color-scheme: dark;
   }
+  /* Color themes, the same six as the app. */
+  :root[data-accent="ember"] { --accent: #e4532b; --accent-2: #ffb03a; --accent-soft: #fdebe4; }
+  :root[data-accent="ocean"] { --accent: #1d6af2; --accent-2: #22c3e6; --accent-soft: #e5eefe; }
+  :root[data-accent="forest"] { --accent: #0e9468; --accent-2: #9be15d; --accent-soft: #dff5ec; }
+  :root[data-accent="rose"] { --accent: #e0386f; --accent-2: #ff8a5c; --accent-soft: #fde6ee; }
+  :root[data-accent="graphite"] { --accent: #3a3a42; --accent-2: #a1a1ab; --accent-soft: #ececf0; }
+  @media (prefers-color-scheme: dark) {
+    :root[data-accent]:not([data-theme="light"]) { --accent-soft: color-mix(in srgb, var(--accent) 22%, #0e0c16); }
+    :root[data-accent="graphite"]:not([data-theme="light"]) { --accent: #d9d9e0; }
+  }
+  :root[data-accent][data-theme="dark"] { --accent-soft: color-mix(in srgb, var(--accent) 22%, #0e0c16); }
+  :root[data-accent="graphite"][data-theme="dark"] { --accent: #d9d9e0; }
 
   *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
     background: var(--bg);
     color: var(--ink);
     font: 400 16px/1.6 var(--body);
     -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+    transition: background-color 0.5s var(--ease), color 0.5s var(--ease);
   }
   h1, h2, h3, p { margin: 0; }
   h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
   a { color: inherit; }
-  img, video { max-width: 100%; display: block; }
+  img, video { display: block; max-width: 100%; }
   button, input, select { font: inherit; color: inherit; }
-  :focus-visible { outline: 2.5px solid var(--lilac); outline-offset: 3px; border-radius: 6px; }
-  .wrap { max-width: var(--wrap); margin: 0 auto; padding-inline: var(--gutter); }
+  .wrap { width: min(var(--wrap), 100% - 2 * var(--gutter)); margin-inline: auto; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  :focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; border-radius: 8px; }
+
   .eyebrow {
-    font: 500 12.5px/1 var(--mono);
-    letter-spacing: 0.08em;
+    font: 600 12px/1 var(--mono);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--accent);
   }
-
-  /* ------------------------------------------------------------- nav */
-  .nav {
-    position: sticky;
-    top: env(safe-area-inset-top, 0px);
-    z-index: 10;
-    background: color-mix(in srgb, var(--night) 88%, transparent);
-    -webkit-backdrop-filter: saturate(160%) blur(16px);
-    backdrop-filter: saturate(160%) blur(16px);
-    border-bottom: 1px solid var(--night-line);
-    color: var(--night-ink);
+  .display {
+    font-family: var(--display);
+    font-stretch: 112%;
+    font-weight: 850;
+    letter-spacing: -0.035em;
+    line-height: 0.98;
   }
-  .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; }
-  .brand { display: inline-flex; align-items: center; gap: 10px; font: 800 19px/1 var(--display); letter-spacing: -0.01em; text-decoration: none; }
-  .brand-mark { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--lilac); color: var(--night); }
-  .nav-links { display: flex; align-items: center; gap: 22px; font-size: 14.5px; font-weight: 600; }
-  .nav-links a { text-decoration: none; color: var(--night-muted); }
-  .nav-links a:hover { color: var(--night-ink); }
+  .grad-text {
+    background: linear-gradient(100deg, var(--accent) 10%, var(--accent-2) 60%, var(--accent) 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: sheen 6s linear infinite;
+  }
+  @keyframes sheen { to { background-position: -220% 0; } }
+
+  /* --------------------------------------------------------------- buttons */
   .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    height: 48px; padding: 0 22px; border: 0; border-radius: 14px;
-    background: var(--accent); color: var(--accent-ink);
-    font-weight: 700; font-size: 15.5px; cursor: pointer; text-decoration: none;
-    transition: transform 0.15s, filter 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 22px;
+    border-radius: 999px;
+    border: 0;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), background-color 0.25s;
   }
-  .btn:hover { filter: brightness(1.08); }
   .btn:active { transform: scale(0.97); }
-  .btn:disabled { opacity: 0.55; cursor: default; }
-  .btn-sm { height: 38px; padding: 0 16px; border-radius: 11px; font-size: 14px; }
-  @media (max-width: 720px) { .nav-links a { display: none; } }
+  .btn-accent {
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--accent-2)));
+    box-shadow: 0 10px 30px -8px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  .btn-accent:hover { transform: translateY(-2px); box-shadow: 0 16px 36px -10px color-mix(in srgb, var(--accent) 80%, transparent); }
+  .btn-ghost { color: var(--night-ink); background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px var(--night-line); }
+  .btn-ghost:hover { background: rgba(255, 255, 255, 0.16); }
+  .btn .arrow { transition: transform 0.25s var(--ease); }
+  .btn:hover .arrow { transform: translateX(3px); }
 
-  /* ------------------------------------------------------------ hero */
+  /* -------------------------------------------------------------------- nav */
+  .nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    padding: max(10px, env(safe-area-inset-top)) 0 10px;
+    color: var(--night-ink);
+    transition: background-color 0.35s, backdrop-filter 0.35s, box-shadow 0.35s, color 0.35s;
+  }
+  .nav.solid {
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    backdrop-filter: saturate(1.6) blur(16px);
+    -webkit-backdrop-filter: saturate(1.6) blur(16px);
+    box-shadow: 0 1px 0 var(--line);
+    color: var(--ink);
+  }
+  .nav .wrap { display: flex; align-items: center; gap: 12px; }
+  .logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font: 800 19px/1 var(--display); font-stretch: 112%; letter-spacing: -0.02em; }
+  .logo-mark { width: 32px; height: 32px; flex: none; }
+  .logo b { font-weight: 850; }
+  .logo span { font-weight: 600; opacity: 0.85; }
+  .nav-links { display: flex; gap: 22px; margin-left: 28px; font-size: 14px; font-weight: 600; }
+  .nav-links a { text-decoration: none; opacity: 0.78; transition: opacity 0.2s; }
+  .nav-links a:hover { opacity: 1; }
+  .nav-end { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .lang select { appearance: none; border: 0; background: none; cursor: pointer; padding-right: 2px; }
+  .lang select option { color: #15121f; }
+  .nav .btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
+  @media (max-width: 860px) { .nav-links { display: none; } }
+  @media (max-width: 420px) { .logo span { display: none; } .nav .btn { padding: 0 14px; } }
+
+  /* ------------------------------------------------------------------- hero */
   .hero {
     position: relative;
+    isolation: isolate;
+    overflow: clip;
     color: var(--night-ink);
     background:
-      radial-gradient(60% 70% at 85% 20%, var(--night-2), transparent 70%),
-      radial-gradient(40% 50% at 10% 100%, color-mix(in srgb, var(--teal) 18%, transparent), transparent 70%),
+      radial-gradient(70% 60% at 85% 20%, color-mix(in srgb, var(--accent) 38%, transparent), transparent 70%),
+      radial-gradient(60% 50% at 0% 100%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 70%),
       var(--night);
-    overflow: hidden;
+    padding: calc(96px + env(safe-area-inset-top)) 0 clamp(64px, 9vw, 120px);
+    transition: background 0.6s;
   }
-  .hero .wrap {
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    gap: clamp(32px, 5vw, 72px);
-    align-items: center;
-    padding-block: clamp(40px, 7vw, 88px) clamp(48px, 7vw, 96px);
+  .flow {
+    position: absolute;
+    inset: -10% -20% auto;
+    width: 140%;
+    height: 120%;
+    z-index: -1;
+    opacity: 0.85;
+    transform: translate3d(0, calc(var(--sy, 0) * 0.25px), 0);
   }
-  .hero .eyebrow { color: var(--lilac); }
-  .hero h1 {
-    margin-top: 18px;
-    font: 800 clamp(42px, 6.4vw, 78px)/0.98 var(--display);
-    letter-spacing: -0.035em;
+  .flow path {
+    fill: none;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-dasharray: 1600 2600;
+    animation: flow 14s linear infinite;
   }
-  .hero h1 .lift { color: var(--lilac); }
-  .hero-sub { margin-top: 20px; font-size: clamp(16.5px, 1.6vw, 19px); color: var(--night-muted); max-width: 34em; }
+  .flow path:nth-child(2) { animation-duration: 18s; animation-delay: -4s; stroke-width: 2.2; }
+  .flow path:nth-child(3) { animation-duration: 22s; animation-delay: -9s; }
+  .flow path:nth-child(4) { animation-duration: 16s; animation-delay: -12s; stroke-width: 1; }
+  .flow path:nth-child(5) { animation-duration: 26s; animation-delay: -2s; stroke-width: 3; opacity: 0.5; }
+  @keyframes flow { from { stroke-dashoffset: 4200; } to { stroke-dashoffset: 0; } }
 
-  .waitlist { margin-top: 30px; display: flex; flex-direction: column; gap: 12px; max-width: 520px; }
-  .wl-row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .wl-row input, .wl-row select {
-    height: 52px; border-radius: 14px; border: 1px solid var(--night-line);
-    background: rgba(255, 255, 255, 0.07); color: var(--night-ink);
-    padding: 0 16px; font-size: 16px; outline: none; min-width: 0;
+  .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+  .hero h1 { font-size: clamp(52px, 9.2vw, 128px); }
+  .rotator { position: relative; display: inline-grid; vertical-align: bottom; height: 1.02em; overflow: clip; }
+  .rotator > span {
+    grid-area: 1 / 1;
+    transform: translateY(105%);
+    opacity: 0;
+    transition: transform 0.7s var(--ease), opacity 0.7s var(--ease);
+    padding-right: 0.06em;
   }
-  .wl-row input { flex: 1 1 240px; }
-  .wl-row select { flex: 1 1 180px; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--night-muted) 50%), linear-gradient(135deg, var(--night-muted) 50%, transparent 50%); background-position: calc(100% - 20px) 22px, calc(100% - 15px) 22px; background-size: 5px 5px; background-repeat: no-repeat; }
-  .wl-row select option { color: #17142a; }
+  .rotator > span.on { transform: none; opacity: 1; }
+  .rotator > span.out { transform: translateY(-105%); opacity: 0; }
+  .rotator-sizer { visibility: hidden; grid-area: 1 / 1; }
+  .hero h1 .rest { display: block; font-size: 0.5em; letter-spacing: -0.03em; line-height: 1.05; margin-top: 0.12em; font-stretch: 100%; }
+  .hero-sub { margin-top: 22px; max-width: 34rem; font-size: clamp(17px, 1.6vw, 19px); color: var(--night-muted); }
+  .hero-sub strong { color: var(--night-ink); font-weight: 600; }
+
+  .waitlist { margin-top: 30px; max-width: 32rem; }
+  .wl-row {
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 0 0 1px var(--night-line);
+    backdrop-filter: blur(10px);
+    transition: box-shadow 0.25s;
+  }
+  .wl-row:focus-within { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-2) 70%, transparent), 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent); }
+  .wl-row input {
+    flex: 1;
+    min-width: 0;
+    padding: 0 16px;
+    border: 0;
+    background: none;
+    font-size: 16px;
+    color: var(--night-ink);
+  }
   .wl-row input::placeholder { color: var(--night-muted); }
-  .wl-row input:focus, .wl-row select:focus { border-color: var(--lilac); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lilac) 30%, transparent); }
-  .wl-row .btn { height: 52px; flex: 1 1 100%; }
-  .wl-note { font-size: 13.5px; color: var(--night-muted); }
-  .wl-msg { font-size: 14.5px; padding: 12px 14px; border-radius: 12px; }
-  .wl-msg.err { background: color-mix(in srgb, var(--danger) 22%, transparent); color: #ffd9df; }
-  .wl-done {
-    display: flex; gap: 14px; align-items: flex-start;
-    padding: 18px; border-radius: 16px;
-    background: color-mix(in srgb, var(--good) 16%, transparent);
-    border: 1px solid color-mix(in srgb, var(--good) 40%, transparent);
+  .wl-row input:focus { outline: none; }
+  .wl-msg { min-height: 24px; margin-top: 10px; font-size: 14px; color: var(--night-muted); }
+  .wl-msg.ok { color: #7ee2b0; }
+  .wl-msg.err { color: #ff9aa8; }
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 8px; }
+  .hero-actions .hint { font-size: 13px; color: var(--night-muted); }
+  .proof { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+  .proof > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--night-ink);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 0 0 1px var(--night-line);
   }
-  .wl-done-icon { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--good); color: #fff; }
-  .wl-done strong { display: block; font-size: 16.5px; }
-  .wl-done span { font-size: 14px; color: var(--night-muted); }
-  .wl-done button { margin-top: 6px; background: none; border: 0; padding: 0; color: var(--lilac); font-weight: 600; font-size: 14px; cursor: pointer; }
+  .proof svg { color: var(--accent-2); }
 
-  .proof { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 13.5px; color: var(--night-muted); }
-  .proof span { display: inline-flex; align-items: center; gap: 7px; }
-  .proof svg { color: var(--lilac); }
-
-  /* phone + chapters */
-  .demo { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  /* Phone */
+  .stagebox { position: relative; display: grid; place-items: center; min-height: 560px; }
   .phone {
     position: relative;
-    width: min(320px, 78vw);
-    aspect-ratio: 780 / 1688;
-    max-width: 100%;
-    border-radius: 46px;
-    padding: 10px;
-    background: #0a0814;
+    width: clamp(240px, 27vw, 320px);
+    aspect-ratio: 390 / 844;
+    border-radius: 54px;
+    padding: 11px;
+    background: linear-gradient(145deg, #2b2638, #0b0911 60%);
     box-shadow:
-      0 0 0 1.5px rgba(255, 255, 255, 0.16),
-      0 40px 80px rgba(0, 0, 0, 0.55),
-      0 0 120px color-mix(in srgb, var(--accent) 35%, transparent);
+      inset 0 0 0 1.5px rgba(255, 255, 255, 0.14),
+      0 50px 100px -30px rgba(0, 0, 0, 0.75),
+      0 30px 60px -30px color-mix(in srgb, var(--accent) 60%, transparent);
   }
-  .phone video { width: 100%; height: 100%; object-fit: cover; border-radius: 37px; background: #f3f2f8; }
-  .phone::after { content: ""; position: absolute; top: 20px; left: 50%; width: 92px; height: 26px; margin-left: -46px; border-radius: 14px; background: #000; }
-  .play {
-    position: absolute; right: 22px; bottom: 22px; z-index: 2;
-    width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
-    display: grid; place-items: center;
-    background: rgba(21, 15, 38, 0.82); color: #fff;
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 21px;
+    left: 50%;
+    width: 28%;
+    height: 22px;
+    translate: -50% 0;
+    border-radius: 20px;
+    background: #050407;
+    z-index: 3;
   }
-  .chapters { width: min(360px, 100%); display: flex; flex-direction: column; gap: 2px; }
-  .chapter {
-    display: grid; grid-template-columns: 44px 1fr; align-items: center; gap: 10px;
-    width: 100%; padding: 7px 10px; border: 0; border-radius: 10px; text-align: left; cursor: pointer;
-    background: transparent; color: var(--night-muted); font-size: 14px; font-weight: 600;
-    position: relative; overflow: hidden;
+  /* The captures have no status bar, so each screen draws one (time + icons) above them. */
+  .screen { --bar: 8.5%; position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; background: #f3f2f8; color: #15121f; transition: background 0.5s, color 0.5s; }
+  .screen.dark { background: #0b0a11; color: #f3f1fa; }
+  .screen::before {
+    content: "9:41";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 36%;
+    height: var(--bar);
+    display: grid;
+    place-items: center;
+    font: 700 clamp(9px, 0.95vw, 13px)/1 var(--body);
+    z-index: 2;
   }
-  .chapter .t { font: 500 12px/1 var(--mono); color: var(--night-muted); opacity: 0.8; }
-  .chapter:hover { color: var(--night-ink); }
-  .chapter.on { color: var(--night-ink); background: rgba(255, 255, 255, 0.07); }
-  .chapter.on .t { color: var(--lilac); opacity: 1; }
-  .chapter .bar { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--lilac); width: 0; }
+  .screen::after {
+    content: "";
+    position: absolute;
+    top: calc(var(--bar) / 2 - 4px);
+    right: 9%;
+    width: 22px;
+    height: 9px;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1.3px currentColor;
+    background: linear-gradient(currentColor, currentColor) 2px 2px / 60% 5px no-repeat;
+    opacity: 0.85;
+    z-index: 2;
+  }
+  .screen > img, .screen > video { position: absolute; inset: var(--bar) 0 0; width: 100%; height: calc(100% - var(--bar)); object-fit: cover; object-position: top; }
+  .screen > img { opacity: 0; transition: opacity 0.6s var(--ease), transform 0.8s var(--ease); transform: scale(1.03); }
+  .screen > img.on { opacity: 1; transform: none; }
+  .hero .phone { transform: perspective(1200px) rotateY(calc(var(--mx, 0) * -6deg)) rotateX(calc(var(--my, 0) * 5deg)); transition: transform 0.4s var(--ease); }
 
-  @media (max-width: 880px) {
-    .hero .wrap { grid-template-columns: 1fr; }
-    .demo { order: 2; }
+  .chip {
+    position: absolute;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px 10px 10px;
+    border-radius: 18px;
+    color: var(--night-ink);
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: inset 0 0 0 1px var(--night-line), 0 18px 40px -16px rgba(0, 0, 0, 0.6);
+    font-size: 13px;
+    line-height: 1.3;
+    max-width: 230px;
+    translate: calc(var(--mx, 0) * var(--depth, 14px)) calc(var(--my, 0) * var(--depth, 14px));
+    animation: bob 6s ease-in-out infinite;
+  }
+  .chip strong { display: block; font-size: 14px; }
+  .chip small { color: var(--night-muted); font-size: 12px; }
+  .chip .ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: color-mix(in srgb, var(--accent) 80%, #000); color: #fff; }
+  .chip-pr { top: 9%; left: -4%; --depth: 22px; }
+  .chip-pr .ico { background: linear-gradient(135deg, #18a46b, #3dd598); }
+  .chip-coach { top: 44%; right: -10%; --depth: -18px; animation-delay: -2s; max-width: 220px; }
+  .chip-macro { bottom: 8%; left: -8%; --depth: 16px; animation-delay: -4s; }
+  .chip-macro .ring { width: 38px; height: 38px; flex: none; }
+  .chip-macro .ring circle:last-child { stroke-dasharray: 100; stroke-dashoffset: 100; animation: ringfill 2.4s var(--ease) 0.8s forwards; }
+  @keyframes ringfill { to { stroke-dashoffset: 28; } }
+  @keyframes bob { 50% { transform: translateY(-10px); } }
+  .glow { position: absolute; width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 55%, transparent), transparent 65%); filter: blur(20px); z-index: -1; }
+
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .stagebox { min-height: 0; margin-top: 12px; }
+    .chip-coach { right: -2%; }
+    .chip-pr { left: 0; }
+    .chip-macro { left: 0; }
+  }
+  @media (max-width: 480px) {
+    .chip { max-width: 180px; font-size: 12px; padding: 8px 10px 8px 8px; }
+    .chip .ico { width: 28px; height: 28px; }
+    .chip-coach { right: -4px; top: 50%; }
+    .chip-pr { left: -4px; }
+    .chip-macro { left: -4px; }
+    .wl-row { flex-direction: column; border-radius: 22px; }
+    .wl-row input { min-height: 48px; }
   }
 
-  /* ---------------------------------------------------------- sections */
-  section.band { padding-block: clamp(56px, 8vw, 104px); }
-  .band-head { max-width: 680px; display: flex; flex-direction: column; gap: 14px; }
-  .band-head h2 { font: 800 clamp(30px, 4vw, 46px)/1.04 var(--display); letter-spacing: -0.03em; }
-  .band-head p { color: var(--ink-2); font-size: 17.5px; }
+  /* -------------------------------------------------------------- marquee */
+  .marquee { background: var(--night); color: var(--night-ink); padding: 18px 0; overflow: clip; border-block: 1px solid var(--night-line); }
+  .marquee-track { display: flex; width: max-content; gap: 0; animation: slide 38s linear infinite; }
+  .marquee-track.rev { animation-direction: reverse; animation-duration: 46s; margin-top: 10px; opacity: 0.55; }
+  .marquee span { display: inline-flex; align-items: center; gap: 22px; padding-right: 22px; font: 800 clamp(20px, 3vw, 34px)/1.1 var(--display); font-stretch: 118%; letter-spacing: -0.02em; white-space: nowrap; }
+  .marquee span::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+  @keyframes slide { to { transform: translateX(-50%); } }
 
-  .gap-list { margin-top: 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-  .gap { padding: 22px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
-  .gap h3 { font: 700 19px/1.25 var(--display); letter-spacing: -0.01em; }
-  .gap p { color: var(--ink-2); font-size: 15px; }
-  .gap .tag { align-self: flex-start; font: 500 11.5px/1 var(--mono); letter-spacing: 0.05em; padding: 6px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); }
-  @media (max-width: 860px) { .gap-list { grid-template-columns: 1fr; } }
+  /* ------------------------------------------------------------- sections */
+  section { position: relative; }
+  .sec { padding: clamp(80px, 11vw, 150px) 0; }
+  .sec-head { max-width: 46rem; }
+  .sec-head h2 { font-size: clamp(38px, 5.6vw, 76px); margin-top: 14px; }
+  .sec-head p { margin-top: 18px; font-size: clamp(17px, 1.5vw, 19px); color: var(--ink-2); max-width: 38rem; }
 
-  .feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 6vw, 80px); align-items: center; padding-block: clamp(36px, 5vw, 60px); }
-  .feature + .feature { border-top: 1px solid var(--line); }
-  .feature.flip .shot-wrap { order: -1; }
-  .feature-text { display: flex; flex-direction: column; gap: 14px; }
-  .feature-text h3 { font: 800 clamp(26px, 3vw, 36px)/1.08 var(--display); letter-spacing: -0.025em; }
-  .feature-text p { color: var(--ink-2); font-size: 17px; max-width: 32em; }
-  .ticks { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-  .ticks li { display: flex; gap: 10px; align-items: flex-start; font-size: 15.5px; }
-  .ticks svg { flex: none; margin-top: 4px; color: var(--accent); }
-  .unit { font-family: var(--mono); font-size: 0.9em; color: var(--accent); }
-  .shot-wrap { display: flex; justify-content: center; }
-  .shot {
-    width: min(300px, 82vw); max-width: 100%; aspect-ratio: 390 / 844; object-fit: cover; object-position: top;
-    border-radius: 34px; border: 8px solid #0d0b18;
-    box-shadow: 0 30px 60px rgba(23, 20, 42, 0.18);
+  [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); transition-delay: var(--d, 0s); }
+  [data-reveal].in { opacity: 1; transform: none; }
+  .split-words .w { display: inline-block; overflow: clip; vertical-align: bottom; padding-bottom: 0.06em; }
+  .split-words .w > span { display: inline-block; transform: translateY(110%); transition: transform 0.9s var(--ease); transition-delay: calc(var(--i) * 45ms); }
+  .split-words.in .w > span { transform: none; }
+
+  /* Scroll story */
+  .story { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 6vw, 96px); margin-top: clamp(40px, 6vw, 80px); }
+  .steps { position: relative; padding-left: 34px; }
+  .rail { position: absolute; left: 8px; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--line); }
+  .rail i { position: absolute; inset: 0 0 auto; height: calc(var(--p, 0) * 100%); border-radius: inherit; background: linear-gradient(var(--accent), var(--accent-2)); }
+  .step { min-height: 72vh; display: flex; flex-direction: column; justify-content: center; opacity: 0.32; transition: opacity 0.5s var(--ease); }
+  .step.on { opacity: 1; }
+  .step .num { position: relative; font: 600 13px/1 var(--mono); color: var(--accent); letter-spacing: 0.12em; }
+  .step .num::before { content: ""; position: absolute; left: -32px; top: 50%; width: 15px; height: 15px; translate: 0 -50%; border-radius: 50%; background: var(--bg); box-shadow: inset 0 0 0 3px var(--line); transition: box-shadow 0.4s, background 0.4s; }
+  .step.on .num::before { background: var(--accent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .step h3 { margin-top: 14px; font: 850 clamp(30px, 3.6vw, 48px)/1.02 var(--display); font-stretch: 110%; letter-spacing: -0.03em; }
+  .step p { margin-top: 14px; color: var(--ink-2); font-size: 18px; max-width: 30rem; }
+  .step ul { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .step li { display: flex; gap: 10px; align-items: baseline; color: var(--ink-2); }
+  .step li::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); translate: 0 -2px; }
+  .story-phone { position: sticky; top: calc(50vh - min(34vw, 330px)); height: fit-content; display: grid; place-items: center; }
+  .story-phone .phone { width: clamp(240px, 26vw, 310px); }
+  .story-phone .badge {
+    position: absolute;
+    bottom: 8%;
+    right: 2%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--line), 0 20px 40px -20px rgba(0, 0, 0, 0.3);
+    font-size: 13px;
+    font-weight: 700;
+    transition: opacity 0.4s, transform 0.4s var(--ease);
   }
-  @media (max-width: 820px) {
-    .feature { grid-template-columns: 1fr; }
-    .feature.flip .shot-wrap { order: 0; }
+  .story-phone .badge em { display: block; font: 600 11px/1.4 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-style: normal; }
+  @media (max-width: 860px) {
+    .story { grid-template-columns: 1fr; }
+    .story-phone { position: sticky; top: 72px; z-index: 2; order: -1; padding: 8px 0 16px; background: linear-gradient(var(--bg) 85%, transparent); }
+    .story-phone .phone { width: min(46vw, 210px); }
+    .story-phone .badge { display: none; }
+    .step { min-height: 62vh; justify-content: flex-start; padding-top: 4vh; }
   }
 
-  .faq { margin-top: 36px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; }
-  .faq details { border-top: 1px solid var(--line); padding-block: 16px; }
-  .faq summary { cursor: pointer; font-weight: 700; font-size: 17px; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
-  .faq summary::-webkit-details-marker { display: none; }
-  .faq summary::after { content: "+"; font-family: var(--mono); color: var(--accent); }
-  .faq details[open] summary::after { content: "–"; }
-  .faq details p { margin-top: 10px; color: var(--ink-2); font-size: 15.5px; }
-  @media (max-width: 760px) { .faq { grid-template-columns: 1fr; } }
+  /* Coach */
+  .coach { color: var(--night-ink); background: var(--night); overflow: clip; }
+  .coach::before { content: ""; position: absolute; inset: auto -20% -40% 30%; height: 80%; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 40%, transparent), transparent); filter: blur(40px); }
+  .coach .sec-head p { color: var(--night-muted); }
+  .coach-grid { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 80px); align-items: start; margin-top: clamp(40px, 6vw, 72px); }
+  .chat { padding: 22px; border-radius: 28px; background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 1px var(--night-line); min-height: 520px; display: flex; flex-direction: column; gap: 12px; }
+  .chat-head { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--night-line); }
+  .avatar { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+  .chat-head small { display: block; color: var(--night-muted); font-size: 12px; }
+  .bubble { width: fit-content; max-width: 86%; padding: 12px 16px; border-radius: 20px; font-size: 15px; line-height: 1.5; opacity: 0; transform: translateY(12px) scale(0.98); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); }
+  .bubble.in { opacity: 1; transform: none; }
+  .bubble.me { align-self: flex-end; color: #fff; background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 65%, var(--accent-2))); border-bottom-right-radius: 6px; }
+  .bubble.ai { align-self: flex-start; background: rgba(255, 255, 255, 0.08); border-bottom-left-radius: 6px; }
+  .bubble.action { width: 100%; max-width: 100%; }
+  .bubble.ai + .bubble.ai { margin-top: -4px; }
+  .typing { display: inline-flex; align-items: center; gap: 5px; padding: 14px 16px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--night-muted); animation: dot 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: 0.15s; }
+  .typing i:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes dot { 30% { transform: translateY(-5px); opacity: 1; } 0%, 60%, 100% { opacity: 0.4; } }
+  .action { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1px var(--night-line); }
+  .action .ico { flex: none; width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--accent-2); }
+  .action div { flex: 1; font-size: 14px; }
+  .action small { display: block; color: var(--night-muted); font-size: 12.5px; }
+  .apply { min-height: 36px; padding: 0 14px; font-size: 13px; border-radius: 999px; border: 0; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; transition: background 0.3s, transform 0.2s; }
+  .apply.done { background: #18a46b; }
+  .apply:active { transform: scale(0.95); }
+  .features { display: grid; gap: 14px; }
+  .feature { display: grid; grid-template-columns: 44px 1fr; gap: 14px; padding: 18px; border-radius: 22px; background: rgba(255, 255, 255, 0.04); box-shadow: inset 0 0 0 1px var(--night-line); transition: background 0.3s, transform 0.3s var(--ease); }
+  .feature:hover { background: rgba(255, 255, 255, 0.07); transform: translateX(4px); }
+  .feature .ico { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 24%, transparent); color: var(--accent-2); }
+  .feature h3 { font-size: 17px; font-weight: 700; }
+  .feature p { margin-top: 4px; font-size: 14.5px; color: var(--night-muted); }
+  @media (max-width: 860px) { .coach-grid { grid-template-columns: 1fr; } .chat { min-height: 0; } }
 
-  .closing { color: var(--night-ink); background: radial-gradient(70% 90% at 50% 0%, var(--night-2), transparent 70%), var(--night); text-align: left; }
-  .closing .wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; padding-block: clamp(56px, 8vw, 96px); }
-  .closing h2 { font: 800 clamp(32px, 4.6vw, 54px)/1.02 var(--display); letter-spacing: -0.03em; max-width: 14em; }
-  .closing p { color: var(--night-muted); font-size: 17.5px; max-width: 36em; }
-  footer { padding-block: 26px; font-size: 13.5px; color: var(--muted); }
-  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  /* Themes */
+  .themes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: center; margin-top: clamp(32px, 5vw, 64px); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
+  .sw { position: relative; display: grid; justify-items: center; gap: 8px; border: 0; background: none; padding: 0; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .sw i { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--a), var(--b)); box-shadow: 0 0 0 3px var(--bg), 0 0 0 3px transparent; transition: box-shadow 0.3s, transform 0.3s var(--ease); }
+  .sw:hover i { transform: translateY(-3px) scale(1.04); }
+  .sw[aria-checked="true"] { color: var(--ink); }
+  .sw[aria-checked="true"] i { box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--a); }
+  .mode { display: inline-flex; margin-top: 28px; padding: 4px; border-radius: 999px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+  .mode button { min-height: 40px; padding: 0 18px; border-radius: 999px; border: 0; background: none; cursor: pointer; font-weight: 700; font-size: 14px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; transition: background 0.3s, color 0.3s; }
+  .mode button[aria-checked="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 2px 10px -4px rgba(0, 0, 0, 0.25); }
+  .themes-note { margin-top: 18px; font-size: 14px; color: var(--muted); }
+  .theme-stage { position: relative; display: grid; place-items: center; }
+  .theme-stage .phone { width: clamp(240px, 26vw, 310px); }
+  .theme-stage::before { content: ""; position: absolute; width: 90%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 30%, transparent), transparent 65%); transition: background 0.6s; }
+  @media (max-width: 860px) { .themes-grid { grid-template-columns: 1fr; } }
 
-  /* owner-only signups panel */
-  .admin { margin-top: 28px; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px dashed var(--accent); }
-  .admin h3 { font: 700 17px/1.2 var(--display); display: flex; justify-content: space-between; gap: 12px; }
-  .admin p { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
-  .admin-table { margin-top: 12px; overflow-x: auto; }
-  .admin table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .admin th, .admin td { text-align: left; padding: 8px 10px; border-top: 1px solid var(--line); white-space: nowrap; }
-  .admin th { font: 500 11.5px/1 var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-  .admin td.num { font-variant-numeric: tabular-nums; }
+  /* Languages */
+  .langs { background: var(--surface); border-block: 1px solid var(--line); overflow: clip; }
+  .lang-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
+  .hello { font: 850 clamp(54px, 7.6vw, 112px)/0.95 var(--display); font-stretch: 112%; letter-spacing: -0.04em; height: 1.05em; position: relative; overflow: visible clip; margin-top: 10px; }
+  .hello span { position: absolute; left: 0; top: 0; white-space: nowrap; transform: translateY(100%); opacity: 0; transition: transform 0.7s var(--ease), opacity 0.7s; }
+  .hello span.on { transform: none; opacity: 1; }
+  .hello span.out { transform: translateY(-100%); opacity: 0; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+  .pill { min-height: 40px; padding: 0 16px; border-radius: 999px; border: 0; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }
+  .pill[aria-pressed="true"] { background: var(--accent); color: #fff; box-shadow: none; }
+  .phones-row { display: flex; justify-content: center; align-items: center; gap: 0; }
+  .phones-row .phone { width: clamp(150px, 16vw, 210px); border-radius: 36px; padding: 7px; transition: transform 0.6s var(--ease), opacity 0.6s; }
+  .phones-row .phone .screen { border-radius: 30px; }
+  .phones-row .phone::before { top: 13px; height: 14px; }
+  .phones-row .phone:nth-child(1) { transform: translateX(22%) rotate(-7deg) scale(0.86); opacity: 0.7; }
+  .phones-row .phone:nth-child(2) { z-index: 2; }
+  .phones-row .phone:nth-child(3) { transform: translateX(-22%) rotate(7deg) scale(0.86); opacity: 0.7; }
+  @media (max-width: 860px) { .lang-grid { grid-template-columns: 1fr; } }
+
+  /* Numbers */
+  .numbers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin-top: clamp(40px, 6vw, 72px); border-radius: 28px; overflow: hidden; background: var(--line); box-shadow: inset 0 0 0 1px var(--line); }
+  .numbers div { padding: clamp(22px, 3vw, 36px); background: var(--surface); }
+  .numbers b { display: block; font: 850 clamp(44px, 6vw, 80px)/1 var(--display); font-stretch: 115%; letter-spacing: -0.04em; color: var(--accent); }
+  .numbers span { display: block; margin-top: 10px; color: var(--ink-2); font-size: 15px; }
+  @media (max-width: 760px) { .numbers { grid-template-columns: 1fr 1fr; } }
+
+  /* Demo */
+  .demo-grid { display: grid; grid-template-columns: auto 1fr; gap: clamp(32px, 6vw, 88px); align-items: center; margin-top: clamp(32px, 5vw, 64px); }
+  .demo-grid .phone { width: clamp(250px, 26vw, 320px); }
+  .chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; counter-reset: ch; }
+  .chapters button { width: 100%; display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: center; text-align: left; padding: 12px 14px; border-radius: 16px; border: 0; background: none; cursor: pointer; font-size: 16px; font-weight: 600; color: var(--ink-2); transition: background 0.25s, color 0.25s; }
+  .chapters button:hover { background: var(--surface-2); }
+  .chapters button[aria-current="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 0 var(--line), 0 10px 30px -18px rgba(0, 0, 0, 0.3); }
+  .chapters time { font: 600 12px/1 var(--mono); color: var(--accent); }
+  .chapters .bar { grid-column: 2; height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; display: none; }
+  .chapters button[aria-current="true"] .bar { display: block; }
+  .chapters .bar i { display: block; height: 100%; width: calc(var(--cp, 0) * 100%); background: var(--accent); }
+  .demo-phone { position: relative; }
+  .playbtn {
+    position: absolute;
+    left: 50%;
+    bottom: -26px;
+    translate: -50% 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--accent-2)));
+    box-shadow: 0 0 0 6px var(--bg), 0 14px 30px -10px color-mix(in srgb, var(--accent) 80%, transparent);
+    cursor: pointer;
+    z-index: 5;
+    transition: transform 0.25s var(--ease);
+  }
+  .playbtn:hover { transform: scale(1.06); }
+  .playbtn .i-pause, .playbtn.playing .i-play { display: none; }
+  .playbtn.playing .i-pause { display: block; }
+  @media (max-width: 860px) { .demo-grid { grid-template-columns: 1fr; justify-items: center; } .chapters { width: 100%; } }
+
+  /* Final CTA */
+  .cta { color: var(--night-ink); background: var(--night); overflow: clip; text-align: center; }
+  .cta .flow { inset: -30% -20% auto; opacity: 0.6; }
+  .cta h2 { font-size: clamp(44px, 8vw, 112px); }
+  .cta p { margin: 22px auto 0; max-width: 34rem; color: var(--night-muted); font-size: 18px; }
+  .cta .waitlist { margin-inline: auto; }
+  .cta .hero-actions { justify-content: center; }
+  footer { background: var(--night); color: var(--night-muted); font-size: 14px; padding: 28px 0 calc(28px + env(safe-area-inset-bottom)); border-top: 1px solid var(--night-line); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; justify-content: space-between; }
+  footer a { color: var(--night-ink); text-decoration: none; }
+  footer nav { display: flex; gap: 20px; }
 
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { transition: none !important; animation: none !important; }
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    [data-reveal], .split-words .w > span, .bubble { opacity: 1 !important; transform: none !important; }
+    .marquee-track { animation: none; }
   }
 </style>
-
-<header class="nav">
+</head>
+<body>
+<header class="nav" id="nav">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="Setwise home">
-      <span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11" /></svg></span>
-      Setwise
+    <a class="logo" href="#top" aria-label="FuerzaFlow home">
+      <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent)" /><stop offset="1" stop-color="var(--accent-2)" /></linearGradient></defs>
+        <rect width="32" height="32" rx="9" fill="url(#lg)" />
+        <path d="M7 20c3.5-6 6.5 4 10-2s6.5 3 8-1" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" />
+        <path d="M7 13c3.5-6 6.5 4 10-2s6.5 3 8-1" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2.2" stroke-linecap="round" />
+      </svg>
+      <span><b>Fuerza</b>Flow</span>
     </a>
     <nav class="nav-links" aria-label="Sections">
-      <a href="#features">Features</a>
-      <a href="#faq">FAQ</a>
-      <a class="btn btn-sm" href="#join">Join the waitlist</a>
+      <a href="#flow" data-i18n="nav.how">How it works</a>
+      <a href="#coach" data-i18n="nav.coach">AI coach</a>
+      <a href="#themes" data-i18n="nav.themes">Themes</a>
+      <a href="#demo" data-i18n="nav.demo">Demo</a>
     </nav>
+    <div class="nav-end">
+      <label class="lang">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5s1.1-6.1 3.4-8.5z" /></svg>
+        <span class="sr-only">Language</span>
+        <select id="lang" aria-label="Language">
+          <option value="en">EN</option><option value="es">ES</option><option value="pt">PT</option><option value="fr">FR</option><option value="de">DE</option><option value="it">IT</option>
+        </select>
+      </label>
+      <a class="btn btn-accent" href="/app/" data-i18n="cta.open">Open the app</a>
+    </div>
   </div>
 </header>
 
 <main id="top">
-  <section class="hero">
-    <div class="wrap">
-      <div>
-        <p class="eyebrow">Strength training · Macros · Early access</p>
-        <h1>Train smarter.<br /><span class="lift">Eat on target.</span></h1>
-        <p class="hero-sub">Setwise builds your program from a 7-question check-in, counts your weekly sets for every muscle, and logs your meals from a photo. Join the waitlist to get it first.</p>
+  <section class="hero" id="hero">
+    <svg class="flow" viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="fg" x1="0" x2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity="0" /><stop offset=".35" stop-color="var(--accent)" /><stop offset=".7" stop-color="var(--accent-2)" /><stop offset="1" stop-color="var(--accent-2)" stop-opacity="0" /></linearGradient>
+      </defs>
+      <path stroke="url(#fg)" d="M-100 620C200 520 320 760 620 640S1000 380 1300 470 1600 640 1760 560" />
+      <path stroke="url(#fg)" d="M-100 700C220 640 360 820 680 700S1060 440 1340 540 1620 700 1760 650" />
+      <path stroke="url(#fg)" d="M-100 540C180 420 340 640 640 560S1040 300 1320 400 1600 560 1760 480" />
+      <path stroke="url(#fg)" d="M-100 780C260 740 420 880 720 780S1100 560 1380 640 1640 760 1760 720" />
+      <path stroke="url(#fg)" d="M-100 460C200 360 380 560 660 480S1060 220 1340 320 1600 460 1760 400" />
+    </svg>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow" data-reveal data-i18n="hero.kicker">AI strength coach · Macros · 6 languages</p>
+        <h1 class="display" data-reveal style="--d: 0.08s">
+          <span class="rotator grad-text" id="rotator" aria-label="Strength">
+            <span class="rotator-sizer" aria-hidden="true">Strength</span>
+            <span class="on">Strength</span><span>Fuerza</span><span>Força</span><span>Force</span><span>Kraft</span><span>Forza</span>
+          </span>
+          <span class="rest" data-i18n="hero.rest">that flows with you.</span>
+        </h1>
+        <p class="hero-sub" data-reveal style="--d: 0.18s" data-i18n-html="hero.sub">A program built for your days and equipment. <strong>An AI coach</strong> that adjusts every workout to how you feel. <strong>Macros from a photo.</strong> All in your language.</p>
 
-        <div id="join">
-          <form class="waitlist" id="wl-form" novalidate>
-            <div class="wl-row">
-              <input id="wl-email" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Email address" required />
-              <select id="wl-goal" aria-label="Main goal">
-                <option value="">My main goal…</option>
-                <option value="muscle">Build muscle</option>
-                <option value="strength">Get stronger</option>
-                <option value="fat_loss">Lose fat</option>
-                <option value="fitness">Stay fit</option>
-              </select>
-              <button class="btn" id="wl-submit" type="submit">Join the waitlist</button>
-            </div>
-            <p class="wl-msg err" id="wl-error" role="alert" hidden></p>
-            <p class="wl-note">One email when your invite is ready. No spam, unsubscribe any time.</p>
-          </form>
-          <div class="wl-done" id="wl-done" role="status" hidden>
-            <span class="wl-done-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg></span>
-            <div>
-              <strong>You're on the list.</strong>
-              <span id="wl-done-text">We'll email you when your invite is ready.</span><br />
-              <button type="button" id="wl-change">Change email</button>
+        <form class="waitlist" data-reveal style="--d: 0.28s" data-source="landing-hero" novalidate>
+          <div class="wl-row">
+            <label class="sr-only" for="wl-email-1" data-i18n="wl.label">Email address</label>
+            <input id="wl-email-1" type="email" name="email" autocomplete="email" required placeholder="you@example.com" data-i18n-ph="wl.ph" />
+            <button class="btn btn-accent" type="submit"><span data-i18n="wl.join">Join the waitlist</span> <span class="arrow" aria-hidden="true">→</span></button>
+          </div>
+          <p class="wl-msg" role="status" aria-live="polite"></p>
+        </form>
+        <div class="hero-actions" data-reveal style="--d: 0.36s">
+          <a class="btn btn-ghost" href="/app/"><span data-i18n="cta.try">Try it free now</span> <span class="arrow" aria-hidden="true">→</span></a>
+          <span class="hint" data-i18n="cta.hint">No download. Add it to your home screen.</span>
+        </div>
+        <div class="proof" data-reveal style="--d: 0.44s">
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span data-i18n="proof.offline">Works offline</span></span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span data-i18n="proof.devices">iPhone & Android</span></span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span data-i18n="proof.dark">Dark mode & 6 themes</span></span>
+        </div>
+      </div>
+
+      <div class="stagebox" data-reveal style="--d: 0.2s">
+        <div class="glow" aria-hidden="true"></div>
+        <div class="phone">
+          <div class="screen"><video src="/demo.mp4" poster="/poster.jpg" autoplay muted loop playsinline preload="metadata" aria-label="FuerzaFlow app demo"></video></div>
+        </div>
+        <div class="chip chip-pr" aria-hidden="true">
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M13 2.5 4.5 13.5H12l-1 8 8.5-11H12z" /></svg></span>
+          <span><strong data-i18n="chip.pr">New record</strong><small data-i18n="chip.prsub">Deadlift · 145 kg × 6</small></span>
+        </div>
+        <div class="chip chip-coach" aria-hidden="true">
+          <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.5c.6 4 1.9 5.9 5.5 6.5-3.6.6-4.9 2.5-5.5 6.5-.6-4-1.9-5.9-5.5-6.5 3.6-.6 4.9-2.5 5.5-6.5z" /></svg></span>
+          <span><strong data-i18n="chip.coach">Coach</strong><small data-i18n="chip.coachsub">Slept badly? I trimmed today to 38 min.</small></span>
+        </div>
+        <div class="chip chip-macro" aria-hidden="true">
+          <svg class="ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="15.9" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="5" /><circle cx="20" cy="20" r="15.9" fill="none" stroke="#e0457b" stroke-width="5" stroke-linecap="round" pathLength="100" transform="rotate(-90 20 20)" /></svg>
+          <span><strong data-i18n="chip.macro">Protein 98 / 128 g</strong><small data-i18n="chip.macrosub">From a photo of lunch</small></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="mq1"></div>
+    <div class="marquee-track rev" id="mq2"></div>
+  </div>
+
+  <section class="sec" id="flow">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow" data-reveal data-i18n="flow.eyebrow">How it flows</p>
+        <h2 class="display split-words" data-reveal data-i18n="flow.title">One app for the whole training day.</h2>
+        <p data-reveal style="--d: 0.1s" data-i18n="flow.sub">From the morning check-in to tonight's protein, FuerzaFlow keeps the plan moving with you.</p>
+      </div>
+      <div class="story">
+        <div class="steps" id="steps">
+          <div class="rail" aria-hidden="true"><i id="rail"></i></div>
+          <article class="step on" data-shot="plan">
+            <span class="num">01</span>
+            <h3 data-i18n="s1.t">Seven questions. Your program.</h3>
+            <p data-i18n="s1.p">Tell us your goal, schedule and equipment. FuerzaFlow picks the split, the exercises and your weekly sets per muscle.</p>
+            <ul><li data-i18n="s1.a">Full gym, dumbbells or a minimal home setup</li><li data-i18n="s1.b">Swap any exercise for one that suits you</li></ul>
+          </article>
+          <article class="step" data-shot="readiness">
+            <span class="num">02</span>
+            <h3 data-i18n="s2.t">Check in. The workout adapts.</h3>
+            <p data-i18n="s2.p">Sleep, energy, soreness and the time you have. Ten seconds, and today's session is trimmed or pushed to match.</p>
+            <ul><li data-i18n="s2.a">Short on time? Main lifts stay, extras go</li><li data-i18n="s2.b">Sore chest? It still trains, with less volume</li></ul>
+          </article>
+          <article class="step" data-shot="workout">
+            <span class="num">03</span>
+            <h3 data-i18n="s3.t">Log fast. Progress on autopilot.</h3>
+            <p data-i18n="s3.p">Tick a set and the rest timer starts. Next time, your weights and rep targets are already set from today.</p>
+            <ul><li data-i18n="s3.a">Progression hints on every lift</li><li data-i18n="s3.b">New records called out the moment you hit them</li></ul>
+          </article>
+          <article class="step" data-shot="macros">
+            <span class="num">04</span>
+            <h3 data-i18n="s4.t">Snap your plate. Hit your macros.</h3>
+            <p data-i18n="s4.p">Photograph a meal, scan a barcode or search. Daily calories and protein are set from your body and goal.</p>
+            <ul><li data-i18n="s4.a">AI estimates each food on the plate</li><li data-i18n="s4.b">Millions of packaged foods by barcode</li></ul>
+          </article>
+          <article class="step" data-shot="progress">
+            <span class="num">05</span>
+            <h3 data-i18n="s5.t">See every muscle on target.</h3>
+            <p data-i18n="s5.p">Weekly sets per muscle against your range, activity over three weeks, and a weekly review from your coach.</p>
+          </article>
+        </div>
+        <div class="story-phone">
+          <div class="phone">
+            <div class="screen" id="storyScreen">
+              <img class="on" src="/screens/plan.jpg" alt="" data-name="plan" />
+              <img src="/screens/readiness.jpg" alt="" data-name="readiness" loading="lazy" />
+              <img src="/screens/workout.jpg" alt="" data-name="workout" loading="lazy" />
+              <img src="/screens/macros.jpg" alt="" data-name="macros" loading="lazy" />
+              <img src="/screens/progress.jpg" alt="" data-name="progress" loading="lazy" />
             </div>
           </div>
-        </div>
-
-        <div class="proof">
-          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>Unlimited routines, free</span>
-          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>Works offline in the gym</span>
-          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>Macros from a photo</span>
+          <div class="badge" id="storyBadge"><em>01</em><span data-i18n="b1">Plan built in 30 s</span></div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="demo" aria-label="Product demo">
-        <div class="phone">
-          <video id="demo" src="demo.mp4" poster="poster.jpg" muted loop playsinline preload="metadata" aria-label="Setwise app walkthrough, 57 seconds"></video>
-          <button class="play" id="play" type="button" aria-label="Pause demo">
-            <svg id="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
+  <section class="sec coach" id="coach">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow" data-reveal data-i18n="coach.eyebrow">AI coach</p>
+        <h2 class="display split-words" data-reveal data-i18n="coach.title">A coach that knows your numbers.</h2>
+        <p data-reveal style="--d: 0.1s" data-i18n="coach.sub">It reads your program, last week's sets, lift trends and today's meals, then answers in plain words. When a change would help, it proposes it and you tap Apply.</p>
+      </div>
+      <div class="coach-grid">
+        <div class="chat" id="chat" data-reveal>
+          <div class="chat-head">
+            <span class="avatar"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5c.6 4 1.9 5.9 5.5 6.5-3.6.6-4.9 2.5-5.5 6.5-.6-4-1.9-5.9-5.5-6.5 3.6-.6 4.9-2.5 5.5-6.5z" /></svg></span>
+            <div><strong data-i18n="chip.coach">Coach</strong><small data-i18n="coach.knows">Knows your training and meals</small></div>
+          </div>
+          <div class="bubble me" data-i18n="chat.q1">I only have 30 minutes today.</div>
+          <div class="bubble ai typing" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="bubble ai" data-i18n="chat.a1">Then keep the presses and rows, cut the rest: 3 sets each, then lateral raises and curls as a superset.</div>
+          <div class="bubble ai" data-i18n="chat.a2">You're at 9 of 10 sets for lats this week, so the rows close that gap. With your shoulder in mind, swap the fly for push-ups.</div>
+          <div class="bubble ai action">
+            <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4 3.5 7.5 7 11M3.5 7.5H17M17 13l3.5 3.5L17 20M20.5 16.5H7" /></svg></span>
+            <div><strong data-i18n="chat.swap">Swap in Push-up</strong><small data-i18n="chat.why">Easier on your left shoulder.</small></div>
+            <button class="apply" type="button" data-i18n="chat.apply">Apply</button>
+          </div>
+        </div>
+        <div class="features">
+          <div class="feature" data-reveal><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg></span><div><h3 data-i18n="f1.t">A brief every morning</h3><p data-i18n="f1.p">Stalled lifts, muscles behind target, new records and protein still to eat, in three lines.</p></div></div>
+          <div class="feature" data-reveal style="--d: 0.06s"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h3l2-6 4 12 2-6h5" /></svg></span><div><h3 data-i18n="f2.t">Workouts that read the room</h3><p data-i18n="f2.p">Poor sleep, low energy or sore muscles change the session before you start.</p></div></div>
+          <div class="feature" data-reveal style="--d: 0.12s"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5h14v10H9l-4 4z" /></svg></span><div><h3 data-i18n="f3.t">Changes you approve</h3><p data-i18n="f3.p">Swaps, program changes, weekly targets and food logs arrive as cards. Nothing changes until you tap Apply.</p></div></div>
+          <div class="feature" data-reveal style="--d: 0.18s"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3.5 8.5 4.5-8.5 4.5L3.5 8zM3.5 12.5l8.5 4.5 8.5-4.5" /></svg></span><div><h3 data-i18n="f4.t">It remembers you</h3><p data-i18n="f4.p">Injuries, schedule, preferences. You can see and delete everything it keeps.</p></div></div>
+          <div class="feature" data-reveal style="--d: 0.24s"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5 4.5 6.5v5c0 4.5 3.2 7.8 7.5 9 4.3-1.2 7.5-4.5 7.5-9v-5z" /></svg></span><div><h3 data-i18n="f5.t">Safety first</h3><p data-i18n="f5.p">Chest pain, a pop or disordered eating get a stop-and-get-help answer, never a workout.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="themes">
+    <div class="wrap themes-grid">
+      <div>
+        <p class="eyebrow" data-reveal data-i18n="th.eyebrow">Themes & night mode</p>
+        <h2 class="display split-words" data-reveal data-i18n="th.title" style="font-size: clamp(38px, 5.6vw, 76px); margin-top: 14px">Your colors. Day or night.</h2>
+        <p data-reveal style="--d: 0.1s; margin-top: 18px; font-size: 18px; color: var(--ink-2); max-width: 32rem" data-i18n="th.sub">Six color themes and a true dark mode that follows your phone or stays on. Try them: this page changes too.</p>
+        <div class="swatches" role="radiogroup" aria-label="Color theme" data-reveal style="--d: 0.16s">
+          <button class="sw" role="radio" aria-checked="true" data-accent="violet" style="--a: #6447f0; --b: #b06bff"><i></i><span data-i18n="c.violet">Violet</span></button>
+          <button class="sw" role="radio" aria-checked="false" data-accent="ember" style="--a: #e4532b; --b: #ffb03a"><i></i><span data-i18n="c.ember">Ember</span></button>
+          <button class="sw" role="radio" aria-checked="false" data-accent="ocean" style="--a: #1d6af2; --b: #22c3e6"><i></i><span data-i18n="c.ocean">Ocean</span></button>
+          <button class="sw" role="radio" aria-checked="false" data-accent="forest" style="--a: #0e9468; --b: #9be15d"><i></i><span data-i18n="c.forest">Forest</span></button>
+          <button class="sw" role="radio" aria-checked="false" data-accent="rose" style="--a: #e0386f; --b: #ff8a5c"><i></i><span data-i18n="c.rose">Rose</span></button>
+          <button class="sw" role="radio" aria-checked="false" data-accent="graphite" style="--a: #3a3a42; --b: #a1a1ab"><i></i><span data-i18n="c.graphite">Graphite</span></button>
+        </div>
+        <div class="mode" role="radiogroup" aria-label="Appearance" data-reveal style="--d: 0.22s">
+          <button role="radio" aria-checked="true" data-mode="light"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" /></svg><span data-i18n="m.light">Light</span></button>
+          <button role="radio" aria-checked="false" data-mode="dark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z" /></svg><span data-i18n="m.dark">Dark</span></button>
+        </div>
+      </div>
+      <div class="theme-stage" data-reveal style="--d: 0.1s">
+        <div class="phone"><div class="screen" id="themeScreen"><img class="on" src="/screens/today-violet.jpg" alt="FuerzaFlow Today screen in the selected theme" /></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec langs" id="languages">
+    <div class="wrap lang-grid">
+      <div>
+        <p class="eyebrow" data-reveal data-i18n="l.eyebrow">Built for the world</p>
+        <div class="hello" id="hello" aria-hidden="true"><span class="on">Hello</span><span>Hola</span><span>Olá</span><span>Bonjour</span><span>Hallo</span><span>Ciao</span></div>
+        <h2 class="display" data-reveal style="font-size: clamp(30px, 3.6vw, 48px); margin-top: 18px" data-i18n="l.title">Every screen, and your coach, in your language.</h2>
+        <p data-reveal style="--d: 0.08s; margin-top: 14px; color: var(--ink-2); font-size: 18px; max-width: 32rem" data-i18n="l.sub">English, Spanish, Portuguese, French, German and Italian. Exercises, foods, numbers and dates all follow along.</p>
+        <div class="pills" id="langPills" data-reveal style="--d: 0.14s">
+          <button class="pill" data-lang="en" aria-pressed="true">English</button><button class="pill" data-lang="es" aria-pressed="false">Español</button><button class="pill" data-lang="pt" aria-pressed="false">Português</button><button class="pill" data-lang="fr" aria-pressed="false">Français</button><button class="pill" data-lang="de" aria-pressed="false">Deutsch</button><button class="pill" data-lang="it" aria-pressed="false">Italiano</button>
+        </div>
+      </div>
+      <div class="phones-row" data-reveal style="--d: 0.1s" aria-hidden="true">
+        <div class="phone"><div class="screen"><img class="on" src="/screens/today-fr.jpg" alt="" loading="lazy" /></div></div>
+        <div class="phone"><div class="screen" id="langScreen"><img class="on" src="/screens/today-violet.jpg" alt="" loading="lazy" /></div></div>
+        <div class="phone"><div class="screen"><img class="on" src="/screens/today-de.jpg" alt="" loading="lazy" /></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="numbers" style="padding-bottom: 0">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow" data-reveal data-i18n="n.eyebrow">Made to fit</p>
+        <h2 class="display split-words" data-reveal data-i18n="n.title">Big on choice. Light on effort.</h2>
+      </div>
+      <div class="numbers" data-reveal>
+        <div><b data-count="55" data-suffix="+">0</b><span data-i18n="n.ex">exercises, home and gym</span></div>
+        <div><b data-count="3">0</b><span data-i18n="n.prog">programs from 3 to 6 days</span></div>
+        <div><b data-count="6">0</b><span data-i18n="n.lang">languages, coach included</span></div>
+        <div><b data-count="10" data-suffix=" s">0</b><span data-i18n="n.check">daily check-in</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="demo">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow" data-reveal data-i18n="d.eyebrow">Product demo</p>
+        <h2 class="display split-words" data-reveal data-i18n="d.title">See a minute of FuerzaFlow.</h2>
+      </div>
+      <div class="demo-grid">
+        <div class="phone demo-phone" data-reveal>
+          <div class="screen"><video id="demoVideo" src="/demo.mp4" poster="/poster.jpg" muted playsinline preload="none" aria-label="FuerzaFlow product demo, about one minute"></video></div>
+          <button class="playbtn" id="playBtn" type="button" aria-label="Play demo">
+            <svg class="i-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" /></svg>
+            <svg class="i-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
           </button>
         </div>
-        <div class="chapters" id="chapters" role="list" aria-label="Demo chapters"></div>
+        <ol class="chapters" id="chapters" data-reveal style="--d: 0.1s"></ol>
       </div>
     </div>
   </section>
 
-  <section class="band" id="features">
+  <section class="sec cta" id="join">
+    <svg class="flow" viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
+      <path stroke="url(#fg)" d="M-100 620C200 520 320 760 620 640S1000 380 1300 470 1600 640 1760 560" />
+      <path stroke="url(#fg)" d="M-100 700C220 640 360 820 680 700S1060 440 1340 540 1620 700 1760 650" />
+      <path stroke="url(#fg)" d="M-100 540C180 420 340 640 640 560S1040 300 1320 400 1600 560 1760 480" />
+    </svg>
     <div class="wrap">
-      <div class="band-head">
-        <p class="eyebrow">Why Setwise</p>
-        <h2>Most workout apps log what you lifted. Setwise understands how you trained.</h2>
-        <p>Primers, partials, eccentrics and weekly volume targets are built into the app, so you never squeeze them into a notes field.</p>
-      </div>
-      <div class="gap-list">
-        <article class="gap">
-          <span class="tag">No caps</span>
-          <h3>Unlimited routines on the free plan</h3>
-          <p>A push/pull/legs split repeated twice is already six routines. Setwise never charges you for having a real program.</p>
-        </article>
-        <article class="gap">
-          <span class="tag">Technique-aware</span>
-          <h3>Partials and eccentrics count</h3>
-          <p>Log “+4 partials” on the set where they happened. Primer and warm-up sets stay out of your volume totals.</p>
-        </article>
-        <article class="gap">
-          <span class="tag">Sets per muscle</span>
-          <h3>Weekly targets for every muscle</h3>
-          <p>See which muscles are behind before the week ends, so you can fix it on Thursday instead of noticing next month.</p>
-        </article>
-      </div>
-
-      <div class="feature">
-        <div class="feature-text">
-          <p class="eyebrow">Personal from day one</p>
-          <h3>Seven questions. One program that fits.</h3>
-          <p>Tell Setwise your goal, experience, schedule and equipment. It picks Full Body, Upper / Lower or a 6-day split and fills it with exercises you can actually do.</p>
-          <ul class="ticks">
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Home with dumbbells? Cable moves are swapped for ones that work there.</span></li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Pick up to 3 focus muscles and each gets an extra set.</span></li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Swap any exercise for one with the same movement and muscles.</span></li>
-          </ul>
+      <h2 class="display split-words" data-reveal data-i18n="cta.title">Get stronger. Stay in flow.</h2>
+      <p data-reveal style="--d: 0.1s" data-i18n="cta.sub">Join the waitlist for early access to accounts and sync, or start training right now in your browser.</p>
+      <form class="waitlist" data-reveal style="--d: 0.18s" data-source="landing-footer" novalidate>
+        <div class="wl-row">
+          <label class="sr-only" for="wl-email-2" data-i18n="wl.label">Email address</label>
+          <input id="wl-email-2" type="email" name="email" autocomplete="email" required placeholder="you@example.com" data-i18n-ph="wl.ph" />
+          <button class="btn btn-accent" type="submit"><span data-i18n="wl.join">Join the waitlist</span> <span class="arrow" aria-hidden="true">→</span></button>
         </div>
-        <div class="shot-wrap"><img class="shot" src="shot-9.jpg" alt="The Setwise questionnaire asking which muscles to bring up" /></div>
+        <p class="wl-msg" role="status" aria-live="polite"></p>
+      </form>
+      <div class="hero-actions" data-reveal style="--d: 0.24s">
+        <a class="btn btn-ghost" href="/app/"><span data-i18n="cta.try">Try it free now</span> <span class="arrow" aria-hidden="true">→</span></a>
       </div>
-
-      <div class="feature flip">
-        <div class="feature-text">
-          <p class="eyebrow">In the gym</p>
-          <h3>Log a set in two taps. Know what to lift next time.</h3>
-          <p>Last session's numbers sit next to every set. Hit the top of your rep range on every set and Setwise suggests the next weight, rounded to the nearest 2.5 kg.</p>
-          <ul class="ticks">
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Rest timer starts when you tick a set: <span class="unit">60 s</span> for primers, <span class="unit">150 s</span> for heavy work.</span></li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Heavy lifts add weight after a clean session and deload <span class="unit">10%</span> after three misses in a row.</span></li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Your screen stays awake while you train, and logging works without signal.</span></li>
-          </ul>
-        </div>
-        <div class="shot-wrap"><img class="shot" src="shot-30.jpg" alt="A workout in progress with completed sets and a rest timer" /></div>
-      </div>
-
-      <div class="feature">
-        <div class="feature-text">
-          <p class="eyebrow">Nutrition</p>
-          <h3>Snap your plate. Get your macros.</h3>
-          <p>Your calorie and protein targets come from your check-in. Take a photo of your meal for an estimate of each food, scan a barcode, or search the food list.</p>
-          <ul class="ticks">
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Protein, carb and fat rings show grams left for the day.</span></li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Photo estimates list each food so you can untick anything that's wrong.</span></li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Barcodes are matched against Open Food Facts.</span></li>
-          </ul>
-        </div>
-        <div class="shot-wrap"><img class="shot" src="shot-44.jpg" alt="Adding chicken breast to breakfast from the food search" /></div>
-      </div>
-
-      <div class="feature flip">
-        <div class="feature-text">
-          <p class="eyebrow">Progress</p>
-          <h3>See every muscle against its target band.</h3>
-          <p>Bars turn green when a muscle lands inside its weekly range and stay violet while it's behind. Secondary muscles count as half a set, so the numbers stay honest.</p>
-          <ul class="ticks">
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Targets from <span class="unit">8–14</span> sets for new lifters to <span class="unit">12–24</span> for advanced.</span></li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg><span>Sessions, working sets and tonnage for the last 7 days.</span></li>
-          </ul>
-        </div>
-        <div class="shot-wrap"><img class="shot" src="shot-53.jpg" alt="Progress screen with weekly sets per muscle against a target band" /></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="band" id="faq" style="padding-top: 0">
-    <div class="wrap">
-      <div class="band-head">
-        <p class="eyebrow">Questions</p>
-        <h2>Before you join</h2>
-      </div>
-      <div class="faq">
-        <details>
-          <summary>Is Setwise free?</summary>
-          <p>Logging, unlimited routines, your history and the weekly muscle counter are free. A Pro plan will add automatic progression, the full planner and deeper analytics.</p>
-        </details>
-        <details>
-          <summary>Which phones does it work on?</summary>
-          <p>Setwise runs in the browser on iPhone and Android, and you can add it to your home screen. Native apps with Apple Health and Health Connect come next.</p>
-        </details>
-        <details>
-          <summary>Does it work without signal?</summary>
-          <p>Yes. Workouts are saved on your phone first, so a dead zone in the gym never loses a set.</p>
-        </details>
-        <details>
-          <summary>How accurate are photo estimates?</summary>
-          <p>They're estimates, not lab measurements. You see every food and its grams before saving, and can untick anything that's wrong.</p>
-        </details>
-        <details>
-          <summary>Can I bring my history from another app?</summary>
-          <p>Import from Strong and Hevy CSV exports is on the launch list, so you keep your past numbers.</p>
-        </details>
-        <details>
-          <summary>What happens to my email?</summary>
-          <p>It's used only to send your invite and launch news.</p>
-        </details>
-      </div>
-      <div class="admin" id="admin" hidden>
-        <h3><span>Waitlist signups</span><span id="admin-count">0</span></h3>
-        <p>Only you can see this panel and these emails.</p>
-        <div class="admin-table"><table><thead><tr><th>Email</th><th>Goal</th><th>Joined</th></tr></thead><tbody id="admin-rows"></tbody></table></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="closing">
-    <div class="wrap">
-      <p class="eyebrow" style="color: var(--lilac)">Early access</p>
-      <h2>Your next block starts with a better plan.</h2>
-      <p>Get an invite as soon as Setwise opens up.</p>
-      <a class="btn" href="#join" id="closing-cta">Join the waitlist</a>
     </div>
   </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <span>© 2026 Setwise</span>
-    <span>Demo video recorded from the working app, with sample workouts.</span>
+    <span>© <span id="year">2026</span> FuerzaFlow</span>
+    <nav aria-label="Footer"><a href="/app/" data-i18n="cta.open">Open the app</a><a href="#coach" data-i18n="nav.coach">AI coach</a><a href="#join" data-i18n="wl.join">Join the waitlist</a></nav>
+    <span data-i18n="foot.note">The coach can make mistakes and isn't medical advice.</span>
   </div>
 </footer>
 
 <script>
-  /* ---------------------------------------------------------- demo video */
+  // Supabase settings are filled in at build time (scripts/build-site.mjs).
+  const SUPABASE_URL = "__SUPABASE_URL__";
+  const SUPABASE_KEY = "__SUPABASE_PUBLISHABLE_KEY__";
+  const waitlistReady = !SUPABASE_URL.startsWith("__") && !SUPABASE_KEY.startsWith("__");
+
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+
+  /* ------------------------------------------------------------------ i18n */
+  const LANGS = ["en", "es", "pt", "fr", "de", "it"];
+  // key: [en, es, pt, fr, de, it]
+  const T = {
+    "nav.how": ["How it works", "Cómo funciona", "Como funciona", "Comment ça marche", "So funktioniert's", "Come funziona"],
+    "nav.coach": ["AI coach", "Coach IA", "Coach IA", "Coach IA", "KI-Coach", "Coach IA"],
+    "nav.themes": ["Themes", "Temas", "Temas", "Thèmes", "Themes", "Temi"],
+    "nav.demo": ["Demo", "Demo", "Demo", "Démo", "Demo", "Demo"],
+    "cta.open": ["Open the app", "Abrir la app", "Abrir o app", "Ouvrir l’app", "App öffnen", "Apri l’app"],
+    "hero.kicker": ["AI strength coach · Macros · 6 languages", "Coach de fuerza con IA · Macros · 6 idiomas", "Coach de força com IA · Macros · 6 idiomas", "Coach muscu IA · Macros · 6 langues", "KI-Kraftcoach · Makros · 6 Sprachen", "Coach di forza IA · Macro · 6 lingue"],
+    "hero.rest": ["that flows with you.", "que fluye contigo.", "que flui com você.", "qui suit ton rythme.", "die mit dir fließt.", "che scorre con te."],
+    "hero.sub": [
+      "A program built for your days and equipment. <strong>An AI coach</strong> that adjusts every workout to how you feel. <strong>Macros from a photo.</strong> All in your language.",
+      "Un programa hecho para tus días y tu equipo. <strong>Un coach con IA</strong> que ajusta cada entrenamiento a cómo te sientes. <strong>Macros con una foto.</strong> Todo en tu idioma.",
+      "Um programa feito para seus dias e seu equipamento. <strong>Um coach com IA</strong> que ajusta cada treino a como você se sente. <strong>Macros por foto.</strong> Tudo no seu idioma.",
+      "Un programme construit pour tes jours et ton matériel. <strong>Un coach IA</strong> qui ajuste chaque séance à ta forme. <strong>Les macros en photo.</strong> Le tout dans ta langue.",
+      "Ein Programm für deine Tage und deine Ausrüstung. <strong>Ein KI-Coach</strong>, der jedes Training an deine Tagesform anpasst. <strong>Makros per Foto.</strong> Alles in deiner Sprache.",
+      "Un programma costruito sui tuoi giorni e sulla tua attrezzatura. <strong>Un coach IA</strong> che adatta ogni allenamento a come ti senti. <strong>Macro da una foto.</strong> Tutto nella tua lingua.",
+    ],
+    "wl.label": ["Email address", "Correo electrónico", "E-mail", "Adresse e-mail", "E-Mail-Adresse", "Indirizzo email"],
+    "wl.ph": ["you@example.com", "tu@ejemplo.com", "voce@exemplo.com", "toi@exemple.com", "du@beispiel.de", "tu@esempio.it"],
+    "wl.join": ["Join the waitlist", "Unirme a la lista", "Entrar na lista", "Rejoindre la liste", "Auf die Warteliste", "Entra in lista"],
+    "wl.ok": ["You're on the list. We'll email you when accounts open.", "Ya estás en la lista. Te escribiremos cuando abramos las cuentas.", "Você está na lista. Vamos te avisar por e-mail quando as contas abrirem.", "C’est noté. On t’écrit dès l’ouverture des comptes.", "Du stehst auf der Liste. Wir schreiben dir, sobald Konten verfügbar sind.", "Sei in lista. Ti scriveremo quando apriranno gli account."],
+    "wl.dup": ["You're already on the list.", "Ya estás en la lista.", "Você já está na lista.", "Tu es déjà inscrit.", "Du stehst schon auf der Liste.", "Sei già in lista."],
+    "wl.bad": ["Enter a valid email address.", "Introduce un correo válido.", "Digite um e-mail válido.", "Saisis une adresse e-mail valide.", "Gib eine gültige E-Mail-Adresse ein.", "Inserisci un indirizzo email valido."],
+    "wl.err": ["Couldn't save that. Check your connection and try again.", "No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.", "Não foi possível salvar. Verifique a conexão e tente de novo.", "Impossible d’enregistrer. Vérifie ta connexion et réessaie.", "Konnte nicht gespeichert werden. Prüf deine Verbindung und versuch es erneut.", "Impossibile salvare. Controlla la connessione e riprova."],
+    "wl.off": ["Sign-ups open very soon. Meanwhile, the app is free to try.", "Las inscripciones abren muy pronto. Mientras tanto, prueba la app gratis.", "As inscrições abrem em breve. Enquanto isso, experimente o app de graça.", "Les inscriptions ouvrent très bientôt. En attendant, l’app est gratuite.", "Die Anmeldung öffnet bald. Bis dahin kannst du die App kostenlos testen.", "Le iscrizioni aprono a breve. Intanto l’app è gratuita da provare."],
+    "wl.busy": ["Joining…", "Uniéndote…", "Entrando…", "Inscription…", "Wird eingetragen…", "Iscrizione…"],
+    "cta.try": ["Try it free now", "Pruébala gratis", "Experimente grátis", "Essaie gratuitement", "Jetzt kostenlos testen", "Provala gratis"],
+    "cta.hint": ["No download. Add it to your home screen.", "Sin descargas. Añádela a tu pantalla de inicio.", "Sem download. Adicione à tela inicial.", "Sans téléchargement. Ajoute-la à ton écran d’accueil.", "Kein Download. Einfach zum Home-Bildschirm hinzufügen.", "Nessun download. Aggiungila alla schermata Home."],
+    "proof.offline": ["Works offline", "Funciona sin conexión", "Funciona offline", "Fonctionne hors ligne", "Funktioniert offline", "Funziona offline"],
+    "proof.devices": ["iPhone & Android", "iPhone y Android", "iPhone e Android", "iPhone et Android", "iPhone & Android", "iPhone e Android"],
+    "proof.dark": ["Dark mode & 6 themes", "Modo oscuro y 6 temas", "Modo escuro e 6 temas", "Mode sombre et 6 thèmes", "Dunkelmodus & 6 Themes", "Modalità scura e 6 temi"],
+    "chip.pr": ["New record", "Nuevo récord", "Novo recorde", "Nouveau record", "Neuer Rekord", "Nuovo record"],
+    "chip.prsub": ["Deadlift · 145 kg × 6", "Peso muerto · 145 kg × 6", "Levantamento terra · 145 kg × 6", "Soulevé de terre · 145 kg × 6", "Kreuzheben · 145 kg × 6", "Stacco · 145 kg × 6"],
+    "chip.coach": ["Coach", "Coach", "Coach", "Coach", "Coach", "Coach"],
+    "chip.coachsub": ["Slept badly? I trimmed today to 38 min.", "¿Dormiste mal? He ajustado hoy a 38 min.", "Dormiu mal? Ajustei o treino para 38 min.", "Mal dormi ? J’ai réduit la séance à 38 min.", "Schlecht geschlafen? Heute nur 38 Min.", "Dormito male? Oggi ridotto a 38 min."],
+    "chip.macro": ["Protein 98 / 128 g", "Proteína 98 / 128 g", "Proteína 98 / 128 g", "Protéines 98 / 128 g", "Protein 98 / 128 g", "Proteine 98 / 128 g"],
+    "chip.macrosub": ["From a photo of lunch", "Con una foto del almuerzo", "Pela foto do almoço", "D’après une photo du déjeuner", "Aus einem Foto vom Mittagessen", "Da una foto del pranzo"],
+    "flow.eyebrow": ["How it flows", "Cómo fluye", "Como flui", "Comment ça flue", "So läuft's", "Come scorre"],
+    "flow.title": ["One app for the whole training day.", "Una app para todo tu día de entrenamiento.", "Um app para o dia de treino inteiro.", "Une app pour toute ta journée d’entraînement.", "Eine App für den ganzen Trainingstag.", "Un’app per tutta la giornata di allenamento."],
+    "flow.sub": ["From the morning check-in to tonight's protein, FuerzaFlow keeps the plan moving with you.", "Del chequeo de la mañana a la proteína de la noche, FuerzaFlow mueve el plan contigo.", "Do check-in da manhã à proteína da noite, FuerzaFlow ajusta o plano junto com você.", "Du check-in du matin aux protéines du soir, FuerzaFlow fait avancer le plan avec toi.", "Vom Check-in am Morgen bis zum Protein am Abend: FuerzaFlow bewegt den Plan mit dir.", "Dal check-in del mattino alle proteine della sera, FuerzaFlow fa muovere il piano con te."],
+    "s1.t": ["Seven questions. Your program.", "Siete preguntas. Tu programa.", "Sete perguntas. Seu programa.", "Sept questions. Ton programme.", "Sieben Fragen. Dein Programm.", "Sette domande. Il tuo programma."],
+    "s1.p": ["Tell us your goal, schedule and equipment. FuerzaFlow picks the split, the exercises and your weekly sets per muscle.", "Cuéntanos tu objetivo, tu horario y tu equipo. FuerzaFlow elige la rutina, los ejercicios y tus series semanales por músculo.", "Conte seu objetivo, sua rotina e seu equipamento. FuerzaFlow escolhe a divisão, os exercícios e suas séries semanais por músculo.", "Donne ton objectif, ton emploi du temps et ton matériel. FuerzaFlow choisit le split, les exercices et tes séries hebdo par muscle.", "Nenn uns Ziel, Zeitplan und Ausrüstung. FuerzaFlow wählt den Split, die Übungen und deine Wochensätze pro Muskel.", "Dicci obiettivo, orari e attrezzatura. FuerzaFlow sceglie lo split, gli esercizi e le serie settimanali per muscolo."],
+    "s1.a": ["Full gym, dumbbells or a minimal home setup", "Gimnasio completo, mancuernas o casa con lo mínimo", "Academia completa, halteres ou o mínimo em casa", "Salle complète, haltères ou matériel minimal à la maison", "Komplettes Studio, Kurzhanteln oder minimal zu Hause", "Palestra completa, manubri o il minimo a casa"],
+    "s1.b": ["Swap any exercise for one that suits you", "Cambia cualquier ejercicio por otro que te vaya mejor", "Troque qualquer exercício por outro que combine com você", "Remplace n’importe quel exercice par un autre qui te convient", "Tausche jede Übung gegen eine, die zu dir passt", "Sostituisci qualsiasi esercizio con uno più adatto a te"],
+    "s2.t": ["Check in. The workout adapts.", "Haz el chequeo. El entrenamiento se adapta.", "Faça o check-in. O treino se adapta.", "Fais le check-in. La séance s’adapte.", "Einchecken. Das Training passt sich an.", "Fai il check-in. L’allenamento si adatta."],
+    "s2.p": ["Sleep, energy, soreness and the time you have. Ten seconds, and today's session is trimmed or pushed to match.", "Sueño, energía, agujetas y tiempo disponible. Diez segundos y la sesión de hoy se recorta o se exige más según toque.", "Sono, energia, dores e o tempo que você tem. Dez segundos e a sessão de hoje é reduzida ou intensificada.", "Sommeil, énergie, courbatures et temps dispo. Dix secondes, et la séance du jour est allégée ou poussée en conséquence.", "Schlaf, Energie, Muskelkater und verfügbare Zeit. Zehn Sekunden, und das heutige Training wird gekürzt oder gesteigert.", "Sonno, energia, indolenzimenti e tempo a disposizione. Dieci secondi e la sessione di oggi si accorcia o si intensifica."],
+    "s2.a": ["Short on time? Main lifts stay, extras go", "¿Poco tiempo? Los básicos se quedan, los extras se van", "Pouco tempo? Os básicos ficam, os extras saem", "Peu de temps ? Les gros mouvements restent, le reste saute", "Wenig Zeit? Hauptübungen bleiben, Extras fliegen raus", "Poco tempo? Restano i fondamentali, via gli extra"],
+    "s2.b": ["Sore chest? It still trains, with less volume", "¿Pecho cargado? Se entrena igual, con menos volumen", "Peito dolorido? Ele treina, com menos volume", "Pecs courbaturés ? Ils travaillent quand même, avec moins de volume", "Muskelkater in der Brust? Sie trainiert trotzdem, mit weniger Volumen", "Petto indolenzito? Si allena comunque, con meno volume"],
+    "s3.t": ["Log fast. Progress on autopilot.", "Registra rápido. Progresa en automático.", "Registre rápido. Evolua no automático.", "Note vite. Progresse en pilote auto.", "Schnell eintragen. Fortschritt auf Autopilot.", "Registra in fretta. Progressi in automatico."],
+    "s3.p": ["Tick a set and the rest timer starts. Next time, your weights and rep targets are already set from today.", "Marca una serie y empieza el descanso. La próxima vez, tus pesos y reps objetivo ya salen de hoy.", "Marque uma série e o descanso começa. Na próxima vez, suas cargas e metas de reps já vêm de hoje.", "Coche une série et le repos démarre. La prochaine fois, tes charges et objectifs de reps partent d’aujourd’hui.", "Satz abhaken, Pausentimer läuft. Beim nächsten Mal stehen Gewichte und Wiederholungsziele schon fest.", "Spunta una serie e parte il recupero. La prossima volta carichi e ripetizioni sono già impostati da oggi."],
+    "s3.a": ["Progression hints on every lift", "Indicaciones de progresión en cada ejercicio", "Dicas de progressão em cada exercício", "Conseils de progression sur chaque exercice", "Progressionstipps bei jeder Übung", "Suggerimenti di progressione per ogni esercizio"],
+    "s3.b": ["New records called out the moment you hit them", "Los récords se celebran en cuanto los consigues", "Recordes anunciados assim que você bate", "Records annoncés dès que tu les bats", "Neue Rekorde, sobald du sie aufstellst", "Record segnalati appena li fai"],
+    "s4.t": ["Snap your plate. Hit your macros.", "Fotografía tu plato. Cumple tus macros.", "Fotografe o prato. Bata seus macros.", "Photographie ton assiette. Atteins tes macros.", "Teller fotografieren. Makros treffen.", "Fotografa il piatto. Centra i tuoi macro."],
+    "s4.p": ["Photograph a meal, scan a barcode or search. Daily calories and protein are set from your body and goal.", "Haz una foto, escanea un código de barras o busca. Calorías y proteína diarias según tu cuerpo y tu objetivo.", "Fotografe a refeição, escaneie um código ou busque. Calorias e proteína diárias definidas pelo seu corpo e objetivo.", "Photo, code-barres ou recherche. Calories et protéines du jour fixées selon ton corps et ton objectif.", "Foto, Barcode oder Suche. Tageskalorien und Protein richten sich nach deinem Körper und Ziel.", "Foto, codice a barre o ricerca. Calorie e proteine giornaliere in base al tuo corpo e obiettivo."],
+    "s4.a": ["AI estimates each food on the plate", "La IA estima cada alimento del plato", "A IA estima cada alimento do prato", "L’IA estime chaque aliment de l’assiette", "Die KI schätzt jedes Lebensmittel auf dem Teller", "L’IA stima ogni alimento nel piatto"],
+    "s4.b": ["Millions of packaged foods by barcode", "Millones de productos por código de barras", "Milhões de produtos pelo código de barras", "Des millions de produits par code-barres", "Millionen verpackte Lebensmittel per Barcode", "Milioni di prodotti col codice a barre"],
+    "s5.t": ["See every muscle on target.", "Cada músculo, en su objetivo.", "Cada músculo na meta.", "Chaque muscle dans l’objectif.", "Jeder Muskel im Ziel.", "Ogni muscolo in obiettivo."],
+    "s5.p": ["Weekly sets per muscle against your range, activity over three weeks, and a weekly review from your coach.", "Series semanales por músculo frente a tu rango, actividad de tres semanas y una revisión semanal de tu coach.", "Séries semanais por músculo frente à sua faixa, atividade de três semanas e uma revisão semanal do coach.", "Séries hebdo par muscle face à ta plage, activité sur trois semaines et bilan hebdo de ton coach.", "Wochensätze pro Muskel im Vergleich zu deinem Bereich, drei Wochen Aktivität und ein Wochenrückblick vom Coach.", "Serie settimanali per muscolo rispetto al tuo intervallo, attività di tre settimane e revisione settimanale del coach."],
+    "b1": ["Plan built in 30 s", "Plan listo en 30 s", "Plano pronto em 30 s", "Plan prêt en 30 s", "Plan in 30 s fertig", "Piano pronto in 30 s"],
+    "b2": ["Adjusted to 38 min", "Ajustado a 38 min", "Ajustado para 38 min", "Ajustée à 38 min", "Auf 38 Min. angepasst", "Adattato a 38 min"],
+    "b3": ["Rest timer running", "Descanso en marcha", "Descanso rolando", "Repos en cours", "Pause läuft", "Recupero in corso"],
+    "b4": ["996 kcal left today", "Quedan 996 kcal hoy", "Faltam 996 kcal hoje", "Encore 996 kcal aujourd’hui", "Heute noch 996 kcal", "Restano 996 kcal oggi"],
+    "b5": ["7 of 11 muscles on target", "7 de 11 músculos en objetivo", "7 de 11 músculos na meta", "7 muscles sur 11 dans l’objectif", "7 von 11 Muskeln im Ziel", "7 muscoli su 11 in obiettivo"],
+    "coach.eyebrow": ["AI coach", "Coach IA", "Coach IA", "Coach IA", "KI-Coach", "Coach IA"],
+    "coach.title": ["A coach that knows your numbers.", "Un coach que conoce tus números.", "Um coach que conhece seus números.", "Un coach qui connaît tes chiffres.", "Ein Coach, der deine Zahlen kennt.", "Un coach che conosce i tuoi numeri."],
+    "coach.sub": ["It reads your program, last week's sets, lift trends and today's meals, then answers in plain words. When a change would help, it proposes it and you tap Apply.", "Lee tu programa, las series de la semana, la evolución de tus levantamientos y las comidas de hoy, y te responde claro. Si un cambio ayuda, te lo propone y tú pulsas Aplicar.", "Ele lê seu programa, as séries da semana, a evolução dos levantamentos e as refeições de hoje, e responde sem enrolação. Se uma mudança ajudar, ele propõe e você toca em Aplicar.", "Il lit ton programme, tes séries de la semaine, l’évolution de tes charges et tes repas du jour, puis répond simplement. Si un changement aide, il le propose et tu touches Appliquer.", "Er liest dein Programm, die Sätze der Woche, deine Leistungstrends und die heutigen Mahlzeiten und antwortet klar. Hilft eine Änderung, schlägt er sie vor und du tippst auf Übernehmen.", "Legge il tuo programma, le serie della settimana, l’andamento dei carichi e i pasti di oggi, e risponde chiaro. Se un cambiamento aiuta, lo propone e tu tocchi Applica."],
+    "coach.knows": ["Knows your training and meals", "Conoce tus entrenamientos y comidas", "Conhece seus treinos e refeições", "Connaît tes séances et tes repas", "Kennt dein Training und deine Mahlzeiten", "Conosce allenamenti e pasti"],
+    "chat.q1": ["I only have 30 minutes today.", "Hoy solo tengo 30 minutos.", "Hoje só tenho 30 minutos.", "Je n’ai que 30 minutes aujourd’hui.", "Ich habe heute nur 30 Minuten.", "Oggi ho solo 30 minuti."],
+    "chat.a1": ["Then keep the presses and rows, cut the rest: 3 sets each, then lateral raises and curls as a superset.", "Entonces quédate con los press y los remos y quita el resto: 3 series de cada uno y luego elevaciones laterales y curls en superserie.", "Então mantenha os supinos e remadas e corte o resto: 3 séries de cada, depois elevação lateral e rosca em superset.", "Garde les développés et les rowings, coupe le reste : 3 séries chacun, puis élévations latérales et curls en superset.", "Dann behalte Drücken und Rudern, streich den Rest: je 3 Sätze, danach Seitheben und Curls als Supersatz.", "Allora tieni spinte e rematori e taglia il resto: 3 serie ciascuno, poi alzate laterali e curl in superserie."],
+    "chat.a2": ["You're at 9 of 10 sets for lats this week, so the rows close that gap. With your shoulder in mind, swap the fly for push-ups.", "Llevas 9 de 10 series de dorsal esta semana, así que los remos cierran la diferencia. Por tu hombro, cambia las aperturas por flexiones.", "Você está com 9 de 10 séries de dorsais na semana, então as remadas fecham a diferença. Pensando no ombro, troque o crucifixo por flexões.", "Tu es à 9 séries sur 10 pour les dorsaux cette semaine, les rowings comblent l’écart. Pour ton épaule, remplace les écartés par des pompes.", "Du hast diese Woche 9 von 10 Sätzen für den Latissimus, die Ruderübungen schließen die Lücke. Wegen deiner Schulter: Tausche Fliegende gegen Liegestütze.", "Sei a 9 serie su 10 per i dorsali questa settimana, i rematori chiudono il divario. Per la spalla, sostituisci le croci con i piegamenti."],
+    "chat.swap": ["Swap in Push-up", "Cambiar a Flexión", "Trocar por Flexão de braço", "Passer à Pompe", "Wechsel zu Liegestütz", "Passa a Piegamento"],
+    "chat.why": ["Easier on your left shoulder.", "Más suave para tu hombro izquierdo.", "Mais leve para o ombro esquerdo.", "Plus doux pour ton épaule gauche.", "Schonender für deine linke Schulter.", "Più delicato per la spalla sinistra."],
+    "chat.apply": ["Apply", "Aplicar", "Aplicar", "Appliquer", "Übernehmen", "Applica"],
+    "chat.applied": ["Applied ✓", "Aplicado ✓", "Aplicado ✓", "Appliqué ✓", "Übernommen ✓", "Applicato ✓"],
+    "f1.t": ["A brief every morning", "Un resumen cada mañana", "Um resumo toda manhã", "Un brief chaque matin", "Jeden Morgen ein Briefing", "Un riepilogo ogni mattina"],
+    "f1.p": ["Stalled lifts, muscles behind target, new records and protein still to eat, in three lines.", "Ejercicios estancados, músculos rezagados, nuevos récords y la proteína que te falta, en tres líneas.", "Exercícios estagnados, músculos atrasados, novos recordes e a proteína que falta, em três linhas.", "Exercices qui stagnent, muscles en retard, nouveaux records et protéines restantes, en trois lignes.", "Stagnierende Übungen, Muskeln im Rückstand, neue Rekorde und fehlendes Protein, in drei Zeilen.", "Esercizi in stallo, muscoli indietro, nuovi record e proteine mancanti, in tre righe."],
+    "f2.t": ["Workouts that read the room", "Entrenamientos que leen tu día", "Treinos que leem o seu dia", "Des séances qui lisent ta forme", "Training nach Tagesform", "Allenamenti che leggono la giornata"],
+    "f2.p": ["Poor sleep, low energy or sore muscles change the session before you start.", "Dormir mal, poca energía o agujetas cambian la sesión antes de empezar.", "Sono ruim, pouca energia ou músculos doloridos mudam a sessão antes de começar.", "Mauvais sommeil, peu d’énergie ou courbatures changent la séance avant de commencer.", "Schlechter Schlaf, wenig Energie oder Muskelkater ändern das Training, bevor du startest.", "Sonno scarso, poca energia o indolenzimenti cambiano la sessione prima di iniziare."],
+    "f3.t": ["Changes you approve", "Cambios que tú apruebas", "Mudanças que você aprova", "Des changements que tu valides", "Änderungen, die du freigibst", "Modifiche che approvi tu"],
+    "f3.p": ["Swaps, program changes, weekly targets and food logs arrive as cards. Nothing changes until you tap Apply.", "Cambios de ejercicio, de programa, objetivos semanales y comidas llegan como tarjetas. Nada cambia hasta que pulsas Aplicar.", "Trocas, mudanças de programa, metas semanais e registros de comida chegam como cartões. Nada muda até você tocar em Aplicar.", "Remplacements, programmes, objectifs hebdo et repas arrivent en cartes. Rien ne change avant que tu touches Appliquer.", "Übungstausch, Programmwechsel, Wochenziele und Mahlzeiten kommen als Karten. Nichts ändert sich, bis du auf Übernehmen tippst.", "Sostituzioni, cambi di programma, obiettivi e pasti arrivano come schede. Nulla cambia finché non tocchi Applica."],
+    "f4.t": ["It remembers you", "Te recuerda", "Ele lembra de você", "Il se souvient de toi", "Er merkt sich dich", "Si ricorda di te"],
+    "f4.p": ["Injuries, schedule, preferences. You can see and delete everything it keeps.", "Lesiones, horarios, preferencias. Puedes ver y borrar todo lo que guarda.", "Lesões, rotina, preferências. Você pode ver e apagar tudo o que ele guarda.", "Blessures, emploi du temps, préférences. Tu peux voir et supprimer tout ce qu’il garde.", "Verletzungen, Zeitplan, Vorlieben. Du kannst alles sehen und löschen, was er speichert.", "Infortuni, orari, preferenze. Puoi vedere ed eliminare tutto ciò che conserva."],
+    "f5.t": ["Safety first", "Seguridad ante todo", "Segurança em primeiro lugar", "La sécurité d’abord", "Sicherheit zuerst", "Prima la sicurezza"],
+    "f5.p": ["Chest pain, a pop or disordered eating get a stop-and-get-help answer, never a workout.", "Dolor en el pecho, un chasquido o problemas con la comida reciben un “para y busca ayuda”, nunca un entrenamiento.", "Dor no peito, um estalo ou alimentação desordenada recebem um “pare e procure ajuda”, nunca um treino.", "Douleur thoracique, claquement ou troubles alimentaires reçoivent un « arrête et fais-toi aider », jamais une séance.", "Brustschmerz, ein Knacken oder gestörtes Essverhalten bekommen ein „Stopp, hol dir Hilfe“, nie ein Training.", "Dolore al petto, uno schiocco o disturbi alimentari ricevono un “fermati e chiedi aiuto”, mai un allenamento."],
+    "th.eyebrow": ["Themes & night mode", "Temas y modo noche", "Temas e modo noturno", "Thèmes et mode nuit", "Themes & Nachtmodus", "Temi e modalità notte"],
+    "th.title": ["Your colors. Day or night.", "Tus colores. De día o de noche.", "Suas cores. De dia ou de noite.", "Tes couleurs. De jour comme de nuit.", "Deine Farben. Bei Tag und Nacht.", "I tuoi colori. Di giorno o di notte."],
+    "th.sub": ["Six color themes and a true dark mode that follows your phone or stays on. Try them: this page changes too.", "Seis temas de color y un modo oscuro de verdad que sigue a tu móvil o se queda fijo. Pruébalos: esta página también cambia.", "Seis temas de cor e um modo escuro de verdade que segue o celular ou fica fixo. Experimente: esta página também muda.", "Six thèmes de couleur et un vrai mode sombre qui suit ton téléphone ou reste activé. Essaie : cette page change aussi.", "Sechs Farbthemes und ein echter Dunkelmodus, der deinem Handy folgt oder an bleibt. Probier's aus: Diese Seite ändert sich mit.", "Sei temi di colore e una vera modalità scura che segue il telefono o resta attiva. Provali: cambia anche questa pagina."],
+    "c.violet": ["Violet", "Violeta", "Violeta", "Violet", "Violett", "Viola"],
+    "c.ember": ["Ember", "Brasa", "Brasa", "Braise", "Glut", "Brace"],
+    "c.ocean": ["Ocean", "Océano", "Oceano", "Océan", "Ozean", "Oceano"],
+    "c.forest": ["Forest", "Bosque", "Floresta", "Forêt", "Wald", "Foresta"],
+    "c.rose": ["Rose", "Rosa", "Rosa", "Rose", "Rosé", "Rosa"],
+    "c.graphite": ["Graphite", "Grafito", "Grafite", "Graphite", "Graphit", "Grafite"],
+    "m.light": ["Light", "Claro", "Claro", "Clair", "Hell", "Chiaro"],
+    "m.dark": ["Dark", "Oscuro", "Escuro", "Sombre", "Dunkel", "Scuro"],
+    "l.eyebrow": ["Built for the world", "Hecha para el mundo", "Feito para o mundo", "Pensée pour le monde", "Für die ganze Welt", "Pensata per il mondo"],
+    "l.title": ["Every screen, and your coach, in your language.", "Cada pantalla, y tu coach, en tu idioma.", "Cada tela, e seu coach, no seu idioma.", "Chaque écran, et ton coach, dans ta langue.", "Jeder Bildschirm und dein Coach in deiner Sprache.", "Ogni schermata, e il tuo coach, nella tua lingua."],
+    "l.sub": ["English, Spanish, Portuguese, French, German and Italian. Exercises, foods, numbers and dates all follow along.", "Inglés, español, portugués, francés, alemán e italiano. Ejercicios, alimentos, números y fechas también.", "Inglês, espanhol, português, francês, alemão e italiano. Exercícios, alimentos, números e datas acompanham.", "Anglais, espagnol, portugais, français, allemand et italien. Exercices, aliments, nombres et dates suivent.", "Englisch, Spanisch, Portugiesisch, Französisch, Deutsch und Italienisch. Übungen, Lebensmittel, Zahlen und Daten ziehen mit.", "Inglese, spagnolo, portoghese, francese, tedesco e italiano. Esercizi, alimenti, numeri e date si adeguano."],
+    "n.eyebrow": ["Made to fit", "Hecha a tu medida", "Feito sob medida", "Faite pour toi", "Passt sich an", "Su misura"],
+    "n.title": ["Big on choice. Light on effort.", "Mucha elección. Poco esfuerzo.", "Muita escolha. Pouco esforço.", "Beaucoup de choix. Peu d’effort.", "Viel Auswahl. Wenig Aufwand.", "Tanta scelta. Poco sforzo."],
+    "n.ex": ["exercises, home and gym", "ejercicios, en casa y en el gimnasio", "exercícios, em casa e na academia", "exercices, maison et salle", "Übungen, zu Hause und im Studio", "esercizi, casa e palestra"],
+    "n.prog": ["programs from 3 to 6 days", "programas de 3 a 6 días", "programas de 3 a 6 dias", "programmes de 3 à 6 jours", "Programme mit 3 bis 6 Tagen", "programmi da 3 a 6 giorni"],
+    "n.lang": ["languages, coach included", "idiomas, coach incluido", "idiomas, coach incluído", "langues, coach compris", "Sprachen, Coach inklusive", "lingue, coach incluso"],
+    "n.check": ["daily check-in", "de chequeo diario", "de check-in diário", "de check-in quotidien", "täglicher Check-in", "di check-in quotidiano"],
+    "d.eyebrow": ["Product demo", "Demo del producto", "Demo do produto", "Démo du produit", "Produktdemo", "Demo del prodotto"],
+    "d.title": ["See a minute of FuerzaFlow.", "Un minuto de FuerzaFlow.", "Um minuto de FuerzaFlow.", "Une minute de FuerzaFlow.", "Eine Minute FuerzaFlow.", "Un minuto di FuerzaFlow."],
+    "cta.title": ["Get stronger. Stay in flow.", "Más fuerte. Siempre en flow.", "Mais forte. Sempre no flow.", "Plus fort. Toujours dans le flow.", "Stärker werden. Im Flow bleiben.", "Più forte. Sempre in flow."],
+    "cta.sub": ["Join the waitlist for early access to accounts and sync, or start training right now in your browser.", "Únete a la lista para acceder antes a cuentas y sincronización, o empieza a entrenar ya desde el navegador.", "Entre na lista para ter acesso antecipado a contas e sincronização, ou comece a treinar agora no navegador.", "Rejoins la liste pour un accès anticipé aux comptes et à la synchro, ou commence dès maintenant dans ton navigateur.", "Trag dich ein für frühen Zugang zu Konten und Sync, oder trainiere direkt im Browser los.", "Entra in lista per l’accesso anticipato ad account e sincronizzazione, oppure inizia subito dal browser."],
+    "foot.note": ["The coach can make mistakes and isn't medical advice.", "El coach puede equivocarse y no es consejo médico.", "O coach pode errar e não substitui orientação médica.", "Le coach peut se tromper et ne remplace pas un avis médical.", "Der Coach kann Fehler machen und ersetzt keinen ärztlichen Rat.", "Il coach può sbagliare e non sostituisce il parere medico."],
+  };
   const CHAPTERS = [
-    { t: 0.6, title: "Sign up in one tap" },
-    { t: 4.2, title: "Answer 7 quick questions" },
-    { t: 14.9, title: "Get a plan built for you" },
-    { t: 21.4, title: "See every muscle against its weekly target" },
-    { t: 25.2, title: "Log sets with a rest timer" },
-    { t: 34.9, title: "Swap any exercise" },
-    { t: 38.9, title: "Track macros by photo, barcode or search" },
-    { t: 51.7, title: "Watch your progress" },
+    [0.6, ["Sign up in one tap", "Regístrate con un toque", "Cadastro em um toque", "Inscription en un geste", "Anmeldung mit einem Tipp", "Iscriviti con un tocco"]],
+    [4, ["Answer 7 quick questions", "Responde 7 preguntas rápidas", "Responda 7 perguntas rápidas", "Réponds à 7 questions", "7 kurze Fragen", "Rispondi a 7 domande"]],
+    [14.5, ["Get a plan built for you", "Recibe un plan hecho para ti", "Receba um plano feito para você", "Reçois un plan sur mesure", "Dein maßgeschneiderter Plan", "Ricevi un piano su misura"]],
+    [20.2, ["Your coach briefs you every day", "Tu coach te da un resumen cada día", "Seu coach te resume o dia", "Ton coach te briefe chaque jour", "Tägliches Briefing vom Coach", "Il coach ti aggiorna ogni giorno"]],
+    [24.9, ["A 10-second check-in adjusts the workout", "Un chequeo de 10 s ajusta el entrenamiento", "Um check-in de 10 s ajusta o treino", "Un check-in de 10 s ajuste la séance", "10-Sekunden-Check-in passt das Training an", "Un check-in di 10 s adatta l’allenamento"]],
+    [31.1, ["Log sets with hints and a rest timer", "Registra series con indicaciones y descanso", "Registre séries com dicas e descanso", "Note tes séries avec conseils et repos", "Sätze eintragen mit Tipps und Pausentimer", "Registra serie con suggerimenti e recupero"]],
+    [35.1, ["Swap any exercise", "Cambia cualquier ejercicio", "Troque qualquer exercício", "Remplace n’importe quel exercice", "Jede Übung tauschen", "Sostituisci qualsiasi esercizio"]],
+    [38.9, ["Track macros by photo, barcode or search", "Macros con foto, código o búsqueda", "Macros por foto, código ou busca", "Macros par photo, code-barres ou recherche", "Makros per Foto, Barcode oder Suche", "Macro con foto, codice o ricerca"]],
+    [45.1, ["Themes and dark mode", "Temas y modo oscuro", "Temas e modo escuro", "Thèmes et mode sombre", "Themes und Dunkelmodus", "Temi e modalità scura"]],
+    [51.6, ["In your language", "En tu idioma", "No seu idioma", "Dans ta langue", "In deiner Sprache", "Nella tua lingua"]],
   ];
-  const video = document.getElementById("demo");
-  const list = document.getElementById("chapters");
-  const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-  const items = CHAPTERS.map((c, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "chapter";
-    b.setAttribute("role", "listitem");
-    b.innerHTML = `<span class="t">${fmt(c.t)}</span><span></span><span class="bar"></span>`;
-    b.children[1].textContent = c.title;
-    b.addEventListener("click", () => {
-      video.currentTime = c.t;
-      video.play().catch(() => {});
-      setPlaying(true);
+  const MARQUEE = [
+    ["Personal program", "Programa personal", "Programa personalizado", "Programme perso", "Persönliches Programm", "Programma personale"],
+    ["AI coach", "Coach con IA", "Coach com IA", "Coach IA", "KI-Coach", "Coach IA"],
+    ["Macros from a photo", "Macros con una foto", "Macros por foto", "Macros en photo", "Makros per Foto", "Macro da foto"],
+    ["Works offline", "Sin conexión", "Funciona offline", "Hors ligne", "Offline", "Offline"],
+    ["Dark mode", "Modo oscuro", "Modo escuro", "Mode sombre", "Dunkelmodus", "Modalità scura"],
+    ["6 languages", "6 idiomas", "6 idiomas", "6 langues", "6 Sprachen", "6 lingue"],
+  ];
+  const MARQUEE_2 = ["Fuerza", "Strength", "Força", "Force", "Kraft", "Forza"];
+
+  let lang = "en";
+  const idx = () => LANGS.indexOf(lang);
+  const tr = (k) => (T[k] ? T[k][idx()] || T[k][0] : k);
+
+  function splitWords(el) {
+    const text = el.textContent.trim();
+    el.textContent = "";
+    text.split(/\s+/).forEach((word, i) => {
+      const w = document.createElement("span");
+      w.className = "w";
+      const inner = document.createElement("span");
+      inner.style.setProperty("--i", i);
+      inner.textContent = word;
+      w.append(inner);
+      el.append(w, " ");
     });
-    list.appendChild(b);
-    return b;
-  });
-  video.addEventListener("timeupdate", () => {
-    const t = video.currentTime;
-    const dur = video.duration || 57;
-    let active = 0;
-    CHAPTERS.forEach((c, i) => { if (t >= c.t) active = i; });
-    items.forEach((el, i) => {
-      el.classList.toggle("on", i === active);
-      const start = CHAPTERS[i].t;
-      const end = CHAPTERS[i + 1]?.t ?? dur;
-      el.querySelector(".bar").style.width = i === active ? `${Math.min(100, ((t - start) / (end - start)) * 100)}%` : "0";
+  }
+
+  function applyLang(next) {
+    lang = LANGS.includes(next) ? next : "en";
+    document.documentElement.lang = lang;
+    $$("[data-i18n]").forEach((el) => {
+      el.textContent = tr(el.dataset.i18n);
+      if (el.classList.contains("split-words")) splitWords(el);
     });
-  });
-
-  const playBtn = document.getElementById("play");
-  const playIcon = document.getElementById("play-icon");
-  function setPlaying(on) {
-    playBtn.setAttribute("aria-label", on ? "Pause demo" : "Play demo");
-    playIcon.innerHTML = on ? '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/>' : '<path d="M8 5.5v13l10.5-6.5z"/>';
+    $$("[data-i18n-html]").forEach((el) => (el.innerHTML = tr(el.dataset.i18nHtml)));
+    $$("[data-i18n-ph]").forEach((el) => (el.placeholder = tr(el.dataset.i18nPh)));
+    $("#lang").value = lang;
+    $$("#langPills .pill").forEach((p) => p.setAttribute("aria-pressed", String(p.dataset.lang === lang)));
+    buildMarquee();
+    buildChapters();
+    updateBadge(currentStep);
+    setLangShot(lang);
+    store.set("ff-lang", lang);
   }
-  playBtn.addEventListener("click", () => {
-    if (video.paused) { video.play().catch(() => {}); setPlaying(true); }
-    else { video.pause(); setPlaying(false); }
-  });
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduce) setPlaying(false);
-  else video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
 
-  /* ------------------------------------------------------------ waitlist */
-  const form = document.getElementById("wl-form");
-  const email = document.getElementById("wl-email");
-  const goal = document.getElementById("wl-goal");
-  const submit = document.getElementById("wl-submit");
-  const errorEl = document.getElementById("wl-error");
-  const done = document.getElementById("wl-done");
-  const doneText = document.getElementById("wl-done-text");
-  let db = null, myId = null;
-
-  function showDone(addr) {
-    form.hidden = true;
-    done.hidden = false;
-    doneText.textContent = `We'll email ${addr} when your invite is ready.`;
+  /* --------------------------------------------------------------- marquee */
+  function buildMarquee() {
+    const words = MARQUEE.map((w) => w[idx()]);
+    const row = (list) => [...list, ...list, ...list, ...list].map((w) => `<span>${w}</span>`).join("");
+    $("#mq1").innerHTML = row(words) + row(words);
+    $("#mq2").innerHTML = row(MARQUEE_2) + row(MARQUEE_2);
   }
-  function showError(msg) {
-    errorEl.textContent = msg;
-    errorEl.hidden = false;
+
+  /* ---------------------------------------------------------- hero motion */
+  const rot = $$("#rotator > span:not(.rotator-sizer)");
+  let ri = 0;
+  if (!reduce) {
+    setInterval(() => {
+      const cur = rot[ri];
+      ri = (ri + 1) % rot.length;
+      cur.classList.remove("on");
+      cur.classList.add("out");
+      setTimeout(() => cur.classList.remove("out"), 700);
+      rot[ri].classList.add("on");
+      $("#rotator .rotator-sizer").textContent = rot[ri].textContent;
+    }, 2200);
   }
-  document.getElementById("wl-change").addEventListener("click", () => {
-    done.hidden = true;
-    form.hidden = false;
-    email.focus();
+  const hero = $("#hero");
+  if (!reduce && matchMedia("(pointer: fine)").matches) {
+    hero.addEventListener("pointermove", (e) => {
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty("--mx", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+      hero.style.setProperty("--my", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+    });
+    hero.addEventListener("pointerleave", () => { hero.style.setProperty("--mx", 0); hero.style.setProperty("--my", 0); });
+  }
+
+  /* ------------------------------------------------------- scroll effects */
+  const nav = $("#nav");
+  const steps = $$("#steps .step");
+  const shots = $$("#storyScreen img");
+  let currentStep = 0;
+  function updateBadge(i) {
+    const badge = $("#storyBadge");
+    badge.querySelector("em").textContent = String(i + 1).padStart(2, "0");
+    badge.querySelector("span").textContent = tr(`b${i + 1}`);
+  }
+  function setStep(i) {
+    if (i === currentStep) return;
+    currentStep = i;
+    steps.forEach((s, j) => s.classList.toggle("on", j === i));
+    const name = steps[i].dataset.shot;
+    shots.forEach((img) => img.classList.toggle("on", img.dataset.name === name));
+    updateBadge(i);
+  }
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      nav.classList.toggle("solid", scrollY > hero.offsetHeight - 80);
+      if (!reduce) hero.style.setProperty("--sy", Math.min(scrollY, 900));
+      const mid = innerHeight * 0.5;
+      let active = 0;
+      steps.forEach((s, j) => { if (s.getBoundingClientRect().top < mid) active = j; });
+      setStep(active);
+      const box = $("#steps").getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (mid - box.top) / box.height));
+      $("#rail").parentElement.style.setProperty("--p", p.toFixed(3));
+    });
+  }
+  addEventListener("scroll", onScroll, { passive: true });
+  addEventListener("resize", onScroll);
+
+  /* --------------------------------------------------------------- reveals */
+  const io = new IntersectionObserver(
+    (entries) => entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add("in");
+      io.unobserve(e.target);
+      if (e.target.id === "chat") playChat();
+      if (e.target.classList.contains("numbers")) countUp(e.target);
+    }),
+    { threshold: 0.18, rootMargin: "0px 0px -6% 0px" },
+  );
+  $$("[data-reveal]").forEach((el) => io.observe(el));
+
+  /* ------------------------------------------------------------ coach chat */
+  function playChat() {
+    const bubbles = $$("#chat .bubble");
+    const typing = $("#chat .typing");
+    if (reduce) { bubbles.forEach((b) => b !== typing && b.classList.add("in")); typing.remove(); return; }
+    const seq = bubbles.filter((b) => b !== typing);
+    seq[0].classList.add("in");
+    typing.classList.add("in");
+    let t = 1400;
+    seq.slice(1).forEach((b, i) => {
+      setTimeout(() => {
+        if (i === 0) typing.remove();
+        b.classList.add("in");
+      }, t);
+      t += 1100;
+    });
+  }
+  $("#chat .apply").addEventListener("click", (e) => {
+    const b = e.currentTarget;
+    const done = b.classList.toggle("done");
+    b.dataset.i18n = done ? "chat.applied" : "chat.apply";
+    b.textContent = tr(b.dataset.i18n);
   });
-  document.getElementById("closing-cta").addEventListener("click", () => setTimeout(() => (form.hidden ? null : email.focus()), 400));
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    errorEl.hidden = true;
-    const addr = email.value.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(addr)) return showError("Enter a valid email address, like you@example.com.");
-    if (!db || !myId) return showError("Sign in to Claude to join the waitlist from this page.");
-    submit.disabled = true;
-    submit.textContent = "Joining…";
-    try {
-      await db.doc(`waitlist/${myId}`).set({ email: addr, goal: goal.value || null, joinedAt: new Date().toISOString() });
-      showDone(addr);
-    } catch (err) {
-      showError(err && err.code === "invalid_argument"
-        ? "Your access to this page doesn't allow joining. Ask the owner to share it with you as a Contributor."
-        : "Couldn't save your spot. Check your connection and try again.");
-    } finally {
-      submit.disabled = false;
-      submit.textContent = "Join the waitlist";
-    }
-  });
+  /* ---------------------------------------------------------------- numbers */
+  function countUp(box) {
+    $$("b[data-count]", box).forEach((b) => {
+      const end = +b.dataset.count;
+      const suffix = b.dataset.suffix || "";
+      if (reduce) { b.textContent = end + suffix; return; }
+      const t0 = performance.now();
+      const tick = (now) => {
+        const k = Math.min(1, (now - t0) / 1400);
+        b.textContent = Math.round(end * (1 - Math.pow(1 - k, 3))) + suffix;
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
 
-  (async () => {
-    const claude = window.claude;
-    if (!claude || !claude.use) return;
-    const [dbNs, user] = await Promise.all([claude.use("db"), claude.use("user")]);
-    db = dbNs;
-    if (!db || !user) return;
-    myId = await user.id();
-    try {
-      const mine = await db.doc(`waitlist/${myId}`).get();
-      if (mine.exists) {
-        const d = mine.data();
-        email.value = d.email || "";
-        goal.value = d.goal || "";
-        showDone(d.email || "you");
-      }
-    } catch { /* first visit */ }
+  /* ----------------------------------------------------------------- themes */
+  let accent = "violet";
+  let mode = "light";
+  function swapImg(screen, src, alt = "") {
+    const old = screen.querySelector("img.on");
+    if (old && old.getAttribute("src") === src) return;
+    const img = new Image();
+    img.src = src;
+    img.alt = alt;
+    const show = () => {
+      screen.append(img);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        img.classList.add("on");
+        old?.classList.remove("on");
+        setTimeout(() => old?.remove(), 700);
+      }));
+    };
+    img.decode ? img.decode().then(show, show) : (img.onload = show);
+  }
+  function setTheme() {
+    const root = document.documentElement;
+    if (accent === "violet") delete root.dataset.accent; else root.dataset.accent = accent;
+    root.dataset.theme = mode;
+    $$(".sw").forEach((s) => s.setAttribute("aria-checked", String(s.dataset.accent === accent)));
+    $$(".mode button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.mode === mode)));
+    swapImg($("#themeScreen"), `/screens/today-${accent}${mode === "dark" ? "-dark" : ""}.jpg`, "FuerzaFlow Today screen in the selected theme");
+    $("#themeScreen").classList.toggle("dark", mode === "dark");
+    document.querySelector('meta[name="theme-color"]').content = mode === "dark" ? "#0e0c16" : "#0b0912";
+  }
+  $$(".sw").forEach((s) => s.addEventListener("click", () => { accent = s.dataset.accent; setTheme(); }));
+  $$(".mode button").forEach((b) => b.addEventListener("click", () => { mode = b.dataset.mode; setTheme(); }));
+  // Start in the visitor's own appearance.
+  if (matchMedia("(prefers-color-scheme: dark)").matches) { mode = "dark"; setTheme(); }
 
-    if (await user.isOwner()) {
-      const panel = document.getElementById("admin");
-      const rows = document.getElementById("admin-rows");
-      const count = document.getElementById("admin-count");
-      const GOALS = { muscle: "Build muscle", strength: "Get stronger", fat_loss: "Lose fat", fitness: "Stay fit" };
-      panel.hidden = false;
-      db.collection("waitlist").orderBy("joinedAt", "desc").onSnapshot((snap) => {
-        count.textContent = `${snap.size} ${snap.size === 1 ? "person" : "people"}`;
-        rows.replaceChildren(...snap.docs.map((doc) => {
-          const d = doc.data() || {};
-          const tr = document.createElement("tr");
-          for (const v of [d.email || "", GOALS[d.goal] || "—", d.joinedAt ? new Date(d.joinedAt).toLocaleDateString() : ""]) {
-            const td = document.createElement("td");
-            td.textContent = v;
-            tr.appendChild(td);
-          }
-          return tr;
-        }));
-        if (!snap.size) {
-          const tr = document.createElement("tr");
-          const td = document.createElement("td");
-          td.colSpan = 3;
-          td.textContent = "No signups yet. Share the page to start the list.";
-          tr.appendChild(td);
-          rows.replaceChildren(tr);
-        }
+  /* -------------------------------------------------------------- languages */
+  const hello = $$("#hello span");
+  let hi = 0;
+  if (!reduce) {
+    setInterval(() => {
+      const cur = hello[hi];
+      hi = (hi + 1) % hello.length;
+      cur.classList.remove("on");
+      cur.classList.add("out");
+      setTimeout(() => cur.classList.remove("out"), 700);
+      hello[hi].classList.add("on");
+    }, 1800);
+  }
+  function setLangShot(l) {
+    swapImg($("#langScreen"), l === "en" ? "/screens/today-violet.jpg" : `/screens/today-${l}.jpg`);
+  }
+  $$("#langPills .pill").forEach((p) => p.addEventListener("click", () => applyLang(p.dataset.lang)));
+  $("#lang").addEventListener("change", (e) => applyLang(e.target.value));
+
+  /* ----------------------------------------------------------------- demo */
+  const video = $("#demoVideo");
+  function buildChapters() {
+    const ol = $("#chapters");
+    ol.innerHTML = "";
+    CHAPTERS.forEach(([t, names], i) => {
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      const m = Math.floor(t / 60);
+      const s = String(Math.floor(t % 60)).padStart(2, "0");
+      b.innerHTML = `<time>${m}:${s}</time><span></span><span class="bar"><i></i></span>`;
+      b.querySelector("span").textContent = names[idx()] || names[0];
+      b.addEventListener("click", () => {
+        if (video.preload === "none") video.preload = "auto";
+        video.currentTime = t;
+        video.play().catch(() => {});
       });
-    }
-  })();
+      li.append(b);
+      ol.append(li);
+    });
+    markChapter();
+  }
+  function markChapter() {
+    const now = video.currentTime || 0;
+    let cur = 0;
+    CHAPTERS.forEach(([t], i) => { if (now >= t) cur = i; });
+    const end = CHAPTERS[cur + 1]?.[0] ?? (video.duration || 58);
+    $$("#chapters button").forEach((b, i) => {
+      b.setAttribute("aria-current", String(i === cur && now > 0));
+      if (i === cur) b.style.setProperty("--cp", Math.min(1, (now - CHAPTERS[cur][0]) / (end - CHAPTERS[cur][0])).toFixed(3));
+    });
+  }
+  video.addEventListener("timeupdate", markChapter);
+  const playBtn = $("#playBtn");
+  const syncPlay = () => {
+    playBtn.classList.toggle("playing", !video.paused);
+    playBtn.setAttribute("aria-label", video.paused ? "Play demo" : "Pause demo");
+  };
+  video.addEventListener("play", syncPlay);
+  video.addEventListener("pause", syncPlay);
+  playBtn.addEventListener("click", () => {
+    if (video.paused) { video.preload = "auto"; video.play().catch(() => {}); } else video.pause();
+  });
+  video.addEventListener("click", () => playBtn.click());
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && video.paused && !reduce) { video.preload = "auto"; video.play().catch(() => {}); }
+    else if (!e.isIntersecting && !video.paused) video.pause();
+  }, { threshold: 0.5 }).observe(video);
+
+  /* ---------------------------------------------------------------- waitlist */
+  $$("form.waitlist").forEach((form) => {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = form.querySelector("input");
+      const msg = form.querySelector(".wl-msg");
+      const btn = form.querySelector("button");
+      const email = input.value.trim();
+      const say = (key, tone) => { msg.textContent = tr(key); msg.className = `wl-msg ${tone || ""}`; };
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) return say("wl.bad", "err");
+      if (!waitlistReady) return say("wl.off");
+      btn.disabled = true;
+      say("wl.busy");
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+          method: "POST",
+          headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=minimal" },
+          body: JSON.stringify({ email, lang, source: form.dataset.source }),
+        });
+        if (res.ok) { say("wl.ok", "ok"); input.value = ""; }
+        else if (res.status === 409) say("wl.dup", "ok");
+        else say("wl.err", "err");
+      } catch {
+        say("wl.err", "err");
+      }
+      btn.disabled = false;
+    });
+  });
+
+  /* ------------------------------------------------------------------ boot */
+  $("#year").textContent = new Date().getFullYear();
+  const saved = store.get("ff-lang");
+  const fromBrowser = (navigator.languages || [navigator.language]).map((l) => (l || "").slice(0, 2).toLowerCase()).find((l) => LANGS.includes(l));
+  applyLang(saved || fromBrowser || "en");
+  onScroll();
 </script>
+</body>
+</html>

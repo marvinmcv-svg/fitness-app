@@ -102,6 +102,11 @@ describe("detectRedFlag", () => {
     ["felt a pop in my shoulder", "injury"],
     ["I want to starve myself to cut faster", "eating"],
     ["my legs are sore from yesterday", null],
+    ["Tuve dolor en el pecho haciendo sentadillas", "cardiac"],
+    ["J'ai entendu un claquement dans l'épaule", "injury"],
+    ["Ich habe Brustschmerzen beim Laufen", "cardiac"],
+    ["Ho le gambe indolenzite da ieri", null],
+    ["Estou com dor muscular nas pernas", null],
   ])("%s", (text, flag) => {
     expect(detectRedFlag(text)).toBe(flag);
   });

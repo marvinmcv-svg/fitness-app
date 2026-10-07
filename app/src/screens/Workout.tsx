@@ -14,6 +14,7 @@ import {
 } from "../store";
 import { Icon } from "../ui/Icon";
 import { Ring } from "../ui/Ring";
+import { dayName, progressionReason, t, tn } from "../i18n";
 import { SLOT_LABEL } from "./Today";
 
 interface Props {
@@ -62,17 +63,17 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
     updateExercise(exId, (e) => ({ ...e, sets: e.sets.map((s) => (s.id === setId ? { ...s, ...patch } : s)) }));
 
   return (
-    <div className="workout" role="dialog" aria-label={`${day.label} workout`}>
+    <div className="workout" role="dialog" aria-label={t("{day} workout", { day: dayName(day.label) })}>
       <header className="wk-nav">
-        <button className="icon-btn" onClick={onMinimize} aria-label="Minimize workout">
+        <button className="icon-btn" onClick={onMinimize} aria-label={t("Minimize workout")}>
           <Icon name="chevronDown" />
         </button>
         <div className="wk-nav-title">
-          <span className="wk-nav-name">{day.label}</span>
+          <span className="wk-nav-name">{dayName(day.label)}</span>
           <span className="wk-nav-time">{clock(elapsed)}</span>
         </div>
         <button className="btn-pill" onClick={() => setConfirming(true)}>
-          Finish
+          {t("Finish")}
         </button>
       </header>
       <div className="wk-progress" aria-hidden="true">
@@ -81,7 +82,7 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
 
       <div className="wk-scroll">
         {coachOpen && (session.coachNotes?.length || session.effortCue) ? (
-          <section className="coach-banner" aria-label="Coach notes">
+          <section className="coach-banner" aria-label={t("Coach notes")}>
             <span className="coach-avatar" aria-hidden="true">
               <Icon name="sparkle" size={16} stroke={2.2} />
             </span>
@@ -89,50 +90,50 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
               {session.coachNotes?.map((n, i) => <p key={i}>{n}</p>)}
               {session.effortCue && <p className="coach-cue">{session.effortCue}</p>}
               <button className="link-btn" onClick={() => onCoach()}>
-                Ask coach <Icon name="chevron" size={14} />
+                {t("Ask coach")} <Icon name="chevron" size={14} />
               </button>
             </div>
-            <button className="row-del" onClick={() => setCoachOpen(false)} aria-label="Hide coach notes">
+            <button className="row-del" onClick={() => setCoachOpen(false)} aria-label={t("Hide coach notes")}>
               <Icon name="close" size={14} />
             </button>
           </section>
         ) : (
           <button className="coach-pill" onClick={() => onCoach()}>
-            <Icon name="sparkle" size={15} /> Ask coach mid-workout
+            <Icon name="sparkle" size={15} /> {t("Ask coach mid-workout")}
           </button>
         )}
         {session.exercises.map((ex) => {
           const slot = day.slots[ex.slotIndex]!;
           const prev = exerciseHistory(history, ex.exercise).at(-1);
           const suggestion = suggestionFor(history, slot);
-          const repsHint = slot.reps ? (slot.reps.min === slot.reps.max ? `${slot.reps.max}` : `${slot.reps.min}–${slot.reps.max}`) : "max";
+          const repsHint = slot.reps ? (slot.reps.min === slot.reps.max ? `${slot.reps.max}` : `${slot.reps.min}–${slot.reps.max}`) : t("max");
           const allDone = ex.sets.every((s) => s.done);
           return (
             <article className={`wk-card${allDone ? " is-done" : ""}`} key={ex.id}>
               <div className="wk-card-head">
-                <span className={`slot-badge slot-${slot.slotType}`}>{SLOT_LABEL[slot.slotType]}</span>
+                <span className={`slot-badge slot-${slot.slotType}`}>{t(SLOT_LABEL[slot.slotType])}</span>
                 <h3>{exerciseName(ex.exercise)}</h3>
                 <p className="wk-presc">
-                  {slot.sets.min === slot.sets.max ? slot.sets.max : `${slot.sets.min}–${slot.sets.max}`} sets × {repsHint}
+                  {t("{sets} sets × {reps}", { sets: slot.sets.min === slot.sets.max ? slot.sets.max : `${slot.sets.min}–${slot.sets.max}`, reps: repsHint })}
                   {" · "}
                   {effortLabel(slot.effort, slot.rir)}
-                  {" · "}rest {Math.round(defaultRestSec(slot) / 15) * 15}s
+                  {" · "}{t("rest {s}s", { s: Math.round(defaultRestSec(slot) / 15) * 15 })}
                   {slot.technique && <> · {techniqueName(slot.technique)}</>}
                 </p>
                 {suggestion && (
                   <p className={`suggest suggest-${suggestion.action}`}>
                     <Icon name={suggestion.action === "increase" ? "arrowUp" : suggestion.action === "deload" ? "arrowDown" : "equal"} size={14} stroke={2.4} />
-                    <strong>{suggestion.weight > 0 ? `${suggestion.weight} kg` : "Bodyweight"}</strong>
-                    <span>{suggestion.reason}</span>
+                    <strong>{suggestion.weight > 0 ? `${suggestion.weight} kg` : t("Bodyweight")}</strong>
+                    <span>{progressionReason(suggestion.reason)}</span>
                   </p>
                 )}
               </div>
 
               <div className="set-grid set-head" aria-hidden="true">
-                <span>Set</span>
-                <span>Previous</span>
+                <span>{t("Set")}</span>
+                <span>{t("Previous")}</span>
                 <span>kg</span>
-                <span>Reps</span>
+                <span>{t("Reps")}</span>
                 <span />
               </div>
               {ex.sets.map((set, i) => {
@@ -141,13 +142,13 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
                   <div key={set.id} className={`set-block${set.done ? " done" : ""}`}>
                     <div className="set-grid">
                       <span className="set-no">{slot.slotType === "primer" ? "P" : i + 1}</span>
-                      <span className="set-prev">{p ? `${p.weight || "BW"} × ${p.reps}` : "—"}</span>
+                      <span className="set-prev">{p ? `${p.weight || t("BW")} × ${p.reps}` : "—"}</span>
                       <input
                         id={`w-${set.id}`}
                         className="set-input"
                         inputMode="decimal"
-                        aria-label={`Set ${i + 1} weight in kilograms`}
-                        placeholder={p?.weight ? String(p.weight) : "BW"}
+                        aria-label={t("Set {n} weight in kilograms", { n: i + 1 })}
+                        placeholder={p?.weight ? String(p.weight) : t("BW")}
                         value={set.weight}
                         onChange={(e) => updateSet(ex.id, set.id, { weight: e.target.value.replace(/[^\d.]/g, "") })}
                       />
@@ -155,7 +156,7 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
                         id={`r-${set.id}`}
                         className="set-input"
                         inputMode="numeric"
-                        aria-label={`Set ${i + 1} reps`}
+                        aria-label={t("Set {n} reps", { n: i + 1 })}
                         placeholder={suggestion?.targetReps ? String(suggestion.targetReps) : repsHint}
                         value={set.reps}
                         onChange={(e) => updateSet(ex.id, set.id, { reps: e.target.value.replace(/\D/g, "") })}
@@ -163,7 +164,7 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
                       <button
                         className={`tick${set.done ? " on" : ""}`}
                         aria-pressed={set.done}
-                        aria-label={set.done ? `Mark set ${i + 1} not done` : `Complete set ${i + 1}`}
+                        aria-label={set.done ? t("Mark set {n} not done", { n: i + 1 }) : t("Complete set {n}", { n: i + 1 })}
                         onClick={() => {
                           const done = !set.done;
                           const reps = set.reps || (done ? (suggestion?.targetReps ? String(suggestion.targetReps) : slot.reps ? String(slot.reps.max) : "") : "");
@@ -187,7 +188,7 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
                               <span className="segment-name">+ {techniqueName(f)}</span>
                               <div className="stepper">
                                 <button
-                                  aria-label={`Fewer ${techniqueName(f)}`}
+                                  aria-label={t("Fewer: {technique}", { technique: techniqueName(f) })}
                                   disabled={n === 0}
                                   onClick={() => updateSet(ex.id, set.id, { segments: { ...set.segments, [f]: Math.max(0, n - 1) } })}
                                 >
@@ -195,7 +196,7 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
                                 </button>
                                 <span className="stepper-val">{n}</span>
                                 <button
-                                  aria-label={`More ${techniqueName(f)}`}
+                                  aria-label={t("More: {technique}", { technique: techniqueName(f) })}
                                   onClick={() => updateSet(ex.id, set.id, { segments: { ...set.segments, [f]: n + 1 } })}
                                 >
                                   <Icon name="plus" size={14} stroke={2.6} />
@@ -218,13 +219,13 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
                   }))
                 }
               >
-                <Icon name="plus" size={16} stroke={2.4} /> Add set
+                <Icon name="plus" size={16} stroke={2.4} /> {t("Add set")}
               </button>
             </article>
           );
         })}
         <p className="wk-foot muted small">
-          {totals.done} of {totals.total} sets done. Primer sets don't count toward weekly volume.
+          {t("{done} of {total} sets done. Primer sets don't count toward weekly volume.", { done: totals.done, total: totals.total })}
         </p>
       </div>
 
@@ -232,34 +233,34 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
         <div className="rest" role="status" aria-live="polite">
           <Ring value={restLeft / rest.total} size={44} width={5} color="var(--rest)" track="var(--rest-track)" />
           <div className="rest-text">
-            <span className="rest-label">{restLeft === 0 ? "Go" : "Rest"}</span>
+            <span className="rest-label">{restLeft === 0 ? t("Go") : t("Rest")}</span>
             <span className="rest-time">{clock(restLeft)}</span>
           </div>
           <button className="rest-btn" onClick={() => setRest((r) => r && { endsAt: r.endsAt + 15000, total: r.total + 15 })}>
             +15s
           </button>
           <button className="rest-btn" onClick={() => setRest(null)}>
-            Skip
+            {t("Skip")}
           </button>
         </div>
       )}
 
       {confirming && (
         <div className="sheet-backdrop" onClick={() => setConfirming(false)}>
-          <div className="sheet" role="dialog" aria-label="Finish workout" onClick={(e) => e.stopPropagation()}>
+          <div className="sheet" role="dialog" aria-label={t("Finish workout")} onClick={(e) => e.stopPropagation()}>
             <span className="sheet-grabber" aria-hidden="true" />
-            <h3>Finish {day.label}?</h3>
+            <h3>{t("Finish {day}?", { day: dayName(day.label) })}</h3>
             <p className="muted">
-              {totals.done} {totals.done === 1 ? "set" : "sets"} logged in {clock(elapsed)}. Unticked sets are left out.
+              {tn(totals.done, "{n} set logged in {time}. Unticked sets are left out.", "{n} sets logged in {time}. Unticked sets are left out.", { time: clock(elapsed) })}
             </p>
             <button className="btn-primary" disabled={totals.done === 0} onClick={onFinish}>
-              Save workout
+              {t("Save workout")}
             </button>
             <button className="btn-plain danger" onClick={onDiscard}>
-              Discard workout
+              {t("Discard workout")}
             </button>
             <button className="btn-plain" onClick={() => setConfirming(false)}>
-              Keep training
+              {t("Keep training")}
             </button>
           </div>
         </div>
@@ -271,13 +272,13 @@ export function Workout({ session, history, onChange, onMinimize, onFinish, onDi
 function effortLabel(effort: string, rir?: number) {
   switch (effort) {
     case "sub_max":
-      return "easy, sub-max";
+      return t("easy, sub-max");
     case "rir":
-      return `${rir ?? 2} reps in reserve`;
+      return t("{n} reps in reserve", { n: rir ?? 2 });
     case "form_failure":
-      return "to form failure";
+      return t("to form failure");
     default:
-      return "to failure";
+      return t("to failure");
   }
 }
 

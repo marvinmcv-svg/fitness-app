@@ -1,4 +1,4 @@
-# fitness-app
+# FuerzaFlow
 
 An offline-first strength training log that understands *how* you train: primers, intensity techniques (partials, eccentric-only reps, 1.5-rep ladders, trap sets) and weekly per-muscle set targets. It is not just a log of what you lifted.
 
@@ -27,9 +27,12 @@ This repo currently contains the **storage-agnostic domain core** and the **Post
 - A program's template is stored as validated JSON in `programs.template`, so a program syncs and versions as a single row.
 - Weekly volume is computed client-side by `computeWeeklyVolume`, so it works offline. A server-side materialized view can come later for analytics.
 
-## Live app
+## Live site
 
-https://setwise-nine.vercel.app (Vercel project `setwise`). Every push to `claude/magical-euler-dv5ixk`, the production branch, redeploys it. Open it on a phone and use **Add to Home Screen** to install it. It works offline after the first visit.
+- Landing page: https://fuerzaflow.vercel.app
+- App: https://fuerzaflow.vercel.app/app/
+
+Both deploy from the Vercel project `fuerzaflow`. Every push to `claude/magical-euler-dv5ixk`, the production branch, redeploys them. Open the app on a phone and use **Add to Home Screen** to install it. It works offline after the first visit. (The old address, setwise-nine.vercel.app, still points at the same project.)
 
 ## Run the app
 
@@ -60,12 +63,26 @@ New members land on a welcome page:
 
 The rules live in `src/domain/coach.ts` and the chat spec in `src/coach/spec.ts`. The server function is `api/coach.ts`.
 
+**Settings:** light, dark or automatic appearance; six color themes (Violet, Ember, Ocean, Forest, Rose, Graphite); and six languages (English, Spanish, Portuguese, French, German, Italian). The coach replies in the chosen language. Translations live in `app/src/locales/`, keyed by the English text (`app/src/i18n.ts`); `test/i18n.test.ts` fails if any string is missing from a locale.
+
 Guests' data stays in `localStorage`. With Supabase connected, members' profiles and meals sync to their account. Setup steps are in [`docs/BACKEND_SETUP.md`](docs/BACKEND_SETUP.md).
 
 ```bash
-npm run build:app       # dist/index.html: one self-contained file, works from file://
-npm run build:artifact  # dist/setwise.html: the same build as an Artifact page body
+npm run build:app       # the deployed site: landing page at dist/, the app at dist/app/
+npm run build:artifact  # dist/index.html (works from file://) and dist/fuerzaflow.html for the preview panel
 ```
+
+## Landing page
+
+`landing/index.html` is a standalone page (no build step) with the waitlist, a scroll-driven tour, a live theme and dark-mode switcher, six languages and the product demo. Its media come from the app itself:
+
+```bash
+npm run build:artifact
+node scripts/capture-landing.mjs        # landing/screens/*.jpg
+node scripts/record-demo.mjs <frames>   # landing/demo.mp4 (see the script header for the ffmpeg step)
+```
+
+The waitlist writes to the Supabase `waitlist` table using the same `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as the app; `scripts/build-site.mjs` injects them at build time.
 
 ## Development
 

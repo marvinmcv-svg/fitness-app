@@ -16,6 +16,7 @@ import {
   workingSets,
   type AppState,
 } from "./store";
+import { langName, t } from "./i18n";
 
 /** Compact, model-readable snapshot of the athlete. Kept under LIMITS.contextChars. */
 export function buildContext(s: AppState) {
@@ -90,6 +91,7 @@ export function buildContext(s: AppState) {
       foods_today: eatenToday.map((e) => `${e.meal}: ${e.name} (${e.macros.calories} kcal, ${e.macros.protein}g P)`),
     },
     local_time: today.toLocaleString(),
+    reply_language: langName(),
   };
 }
 
@@ -136,10 +138,10 @@ export async function askCoach(turns: CoachTurn[], context: unknown): Promise<Co
       body: JSON.stringify({ messages: trimmed, context }),
     });
     const body = (await res.json().catch(() => ({}))) as { reply?: string; actions?: CoachAction[]; error?: string; code?: string };
-    if (!res.ok) return { ok: false, error: body.error ?? "The coach couldn't answer. Try again.", code: body.code };
+    if (!res.ok) return { ok: false, error: body.code === "rate_limited" ? t("Too many questions at once. Try again in a minute.") : body.code ? t("The coach couldn't answer. Try again.") : (body.error ?? t("The coach couldn't answer. Try again.")), code: body.code };
     return { ok: true, reply: body.reply ?? "", actions: body.actions ?? [] };
   } catch {
-    return { ok: false, error: "You're offline. The coach needs a connection; your logging still works.", code: "offline" };
+    return { ok: false, error: t("You're offline. The coach needs a connection; your logging still works."), code: "offline" };
   }
 }
 
@@ -161,11 +163,11 @@ async function askViaPreview(sample: NonNullable<SampleFn>, turns: CoachTurn[], 
       tools,
       cache: false,
     });
-    return { ok: true, reply: text.trim() || "Done. Check the suggestions below.", actions };
+    return { ok: true, reply: text.trim() || t("Done. Check the suggestions below."), actions };
   } catch (e) {
     const code = (e as { code?: string }).code;
-    if (code === "not_granted") return { ok: false, error: "Allow this page to ask Claude to use the coach here.", code };
-    if (code === "rate_limited") return { ok: false, error: "Too many questions at once. Try again in a minute.", code };
-    return { ok: false, error: "The coach couldn't answer. Try again.", code };
+    if (code === "not_granted") return { ok: false, error: t("Allow this page to ask Claude to use the coach here."), code };
+    if (code === "rate_limited") return { ok: false, error: t("Too many questions at once. Try again in a minute."), code };
+    return { ok: false, error: t("The coach couldn't answer. Try again."), code };
   }
 }

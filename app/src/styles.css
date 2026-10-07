@@ -124,6 +124,122 @@
   color-scheme: dark;
 }
 
+/* Color themes (Settings → Theme). Each overrides the accent and hero tokens in light and dark. */
+:root[data-accent="ember"] {
+  --accent: #e4532b;
+  --accent-soft: #fdebe4;
+  --hero: #2a130d;
+  --hero-2: #4d2012;
+  --hero-accent: #ff9b78;
+  --shadow-float: 0 10px 30px rgba(228, 83, 43, 0.28);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-accent="ember"]:not([data-theme="light"]) {
+    --accent: #ff7b54;
+    --accent-soft: #3a1d14;
+    --hero: #2e150e;
+    --hero-2: #55230f;
+  }
+}
+:root[data-accent="ember"][data-theme="dark"] {
+  --accent: #ff7b54;
+  --accent-soft: #3a1d14;
+  --hero: #2e150e;
+  --hero-2: #55230f;
+}
+:root[data-accent="ocean"] {
+  --accent: #1d6af2;
+  --accent-soft: #e5eefe;
+  --hero: #0b1a33;
+  --hero-2: #123063;
+  --hero-accent: #80b1ff;
+  --shadow-float: 0 10px 30px rgba(29, 106, 242, 0.28);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-accent="ocean"]:not([data-theme="light"]) {
+    --accent: #5c97ff;
+    --accent-soft: #15233f;
+    --hero: #0f203d;
+    --hero-2: #163a70;
+  }
+}
+:root[data-accent="ocean"][data-theme="dark"] {
+  --accent: #5c97ff;
+  --accent-soft: #15233f;
+  --hero: #0f203d;
+  --hero-2: #163a70;
+}
+:root[data-accent="forest"] {
+  --accent: #0e9468;
+  --accent-soft: #dff5ec;
+  --hero: #0a231a;
+  --hero-2: #11402e;
+  --hero-accent: #6fe3b5;
+  --shadow-float: 0 10px 30px rgba(14, 148, 104, 0.28);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-accent="forest"]:not([data-theme="light"]) {
+    --accent: #34d399;
+    --accent-soft: #11291f;
+    --hero: #0c271d;
+    --hero-2: #134a35;
+    --accent-ink: #04140d;
+  }
+}
+:root[data-accent="forest"][data-theme="dark"] {
+  --accent: #34d399;
+  --accent-soft: #11291f;
+  --hero: #0c271d;
+  --hero-2: #134a35;
+  --accent-ink: #04140d;
+}
+:root[data-accent="rose"] {
+  --accent: #e0386f;
+  --accent-soft: #fde6ee;
+  --hero: #2a0f1b;
+  --hero-2: #4c1631;
+  --hero-accent: #ff9dc0;
+  --shadow-float: 0 10px 30px rgba(224, 56, 111, 0.28);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-accent="rose"]:not([data-theme="light"]) {
+    --accent: #ff6b9b;
+    --accent-soft: #3a1526;
+    --hero: #2e1120;
+    --hero-2: #561a37;
+  }
+}
+:root[data-accent="rose"][data-theme="dark"] {
+  --accent: #ff6b9b;
+  --accent-soft: #3a1526;
+  --hero: #2e1120;
+  --hero-2: #561a37;
+}
+:root[data-accent="graphite"] {
+  --accent: #1f1f24;
+  --accent-soft: #ececf0;
+  --hero: #1c1c1f;
+  --hero-2: #34343a;
+  --hero-accent: #e5e5ea;
+  --shadow-float: 0 10px 30px rgba(20, 20, 24, 0.28);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-accent="graphite"]:not([data-theme="light"]) {
+    --accent: #f2f2f5;
+    --accent-soft: #2a2a30;
+    --hero: #1f1f23;
+    --hero-2: #3a3a42;
+    --accent-ink: #111114;
+  }
+}
+:root[data-accent="graphite"][data-theme="dark"] {
+  --accent: #f2f2f5;
+  --accent-soft: #2a2a30;
+  --hero: #1f1f23;
+  --hero-2: #3a3a42;
+  --accent-ink: #111114;
+}
+
 /* ------------------------------------------------------------------ base */
 *,
 *::before,
@@ -215,6 +331,9 @@ ul {
   height: 100%;
   background: var(--bg);
   overflow: hidden;
+  /* clip, not just hide: focusing an input or scrolling a set into view must
+     never pan the whole app sideways (something inside is wider than the frame). */
+  overflow: clip;
   isolation: isolate;
 }
 @media (min-width: 560px) and (min-height: 700px) {
@@ -2909,4 +3028,88 @@ ul {
   color: var(--accent);
   font-weight: 650;
   font-size: 13.5px;
+}
+
+/* ------------------------------------------------------- settings: theme */
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px 8px;
+  padding: 16px 12px;
+}
+.swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.swatch-dot {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(135deg, var(--sw-1) 20%, var(--sw-2));
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 3px transparent;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.swatch:active .swatch-dot {
+  transform: scale(0.94);
+}
+.swatch.on {
+  color: var(--ink);
+}
+.swatch.on .swatch-dot {
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--sw-1);
+}
+.swatch:focus-visible {
+  outline: none;
+}
+.swatch:focus-visible .swatch-dot {
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--accent);
+}
+.app-version {
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+/* --------------------------------------------- welcome: language picker */
+.welcome-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lang-pick {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--hero-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.lang-pick select {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding-right: 2px;
+  cursor: pointer;
+}
+.lang-pick select option {
+  color: #16141f;
 }

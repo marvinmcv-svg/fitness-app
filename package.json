@@ -2,7 +2,7 @@
   "name": "fitness-app",
   "version": "0.1.0",
   "private": true,
-  "description": "Offline-first, method-aware strength training logger: domain core and database schema.",
+  "description": "FuerzaFlow: offline-first strength training, macros and an AI coach.",
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -11,7 +11,7 @@
     "db:generate": "drizzle-kit generate",
     "check": "npm run typecheck && npm test",
     "dev": "vite",
-    "build:app": "vite build",
+    "build:app": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && vite build --base=/app/ --outDir ../dist/app && node scripts/build-site.mjs",
     "preview": "vite preview",
     "build:artifact": "vite build && node scripts/to-artifact.mjs"
   },

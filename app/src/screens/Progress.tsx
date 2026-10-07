@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { dayLabel, muscleName, rollingVolume, targetsFor, tonnage, workingSets, type AppState } from "../store";
+import { lang, t, tn } from "../i18n";
 import { fmt } from "./Today";
 
 export function Progress({ state }: { state: AppState }) {
@@ -35,31 +36,31 @@ export function Progress({ state }: { state: AppState }) {
     <div className="screen">
       <header className="large-title">
         <div className="lt-text">
-          <p className="eyebrow">Weekly volume</p>
-          <h1>Progress</h1>
+          <p className="eyebrow">{t("Weekly volume")}</p>
+          <h1>{t("Progress")}</h1>
         </div>
       </header>
 
-      <div className="segmented" role="tablist" aria-label="Range">
+      <div className="segmented" role="tablist" aria-label={t("Range")}>
         <button role="tab" aria-selected={range === "this"} className={range === "this" ? "on" : ""} onClick={() => setRange("this")}>
-          Last 7 days
+          {t("Last 7 days")}
         </button>
         <button role="tab" aria-selected={range === "last"} className={range === "last" ? "on" : ""} onClick={() => setRange("last")}>
-          Previous 7 days
+          {t("Previous 7 days")}
         </button>
       </div>
 
       <div className="stat-row">
         <div className="stat card">
-          <span className="stat-label">Sessions</span>
+          <span className="stat-label">{t("Sessions")}</span>
           <span className="stat-value">{workouts.length}</span>
         </div>
         <div className="stat card">
-          <span className="stat-label">Sets</span>
+          <span className="stat-label">{t("Sets")}</span>
           <span className="stat-value">{totalSets}</span>
         </div>
         <div className="stat card">
-          <span className="stat-label">Tonnage</span>
+          <span className="stat-label">{t("Tonnage")}</span>
           <span className="stat-value">
             {(totalKg / 1000).toFixed(1)}
             <small> t</small>
@@ -69,22 +70,22 @@ export function Progress({ state }: { state: AppState }) {
 
       <section className="group">
         <div className="group-head">
-          <h3>Sets per muscle</h3>
+          <h3>{t("Sets per muscle")}</h3>
           <span className="legend">
-            <span className="legend-band" /> target {targets[0]!.minSets}–{targets[0]!.maxSets}
+            <span className="legend-band" /> {t("target {range}", { range: `${targets[0]!.minSets}–${targets[0]!.maxSets}` })}
           </span>
         </div>
         <div className="card bars">
-          {targets.map((t) => {
-            const v = volume.get(t.muscle)?.effectiveSets ?? 0;
-            const tone = v > t.maxSets ? "warn" : v >= t.minSets ? "good" : "under";
+          {targets.map((tg) => {
+            const v = volume.get(tg.muscle)?.effectiveSets ?? 0;
+            const tone = v > tg.maxSets ? "warn" : v >= tg.minSets ? "good" : "under";
             return (
-              <div className="bar-row" key={t.muscle}>
-                <span className="bar-name">{muscleName.get(t.muscle)}</span>
+              <div className="bar-row" key={tg.muscle}>
+                <span className="bar-name">{muscleName.get(tg.muscle)}</span>
                 <div className="bar-track">
                   <span
                     className="bar-band"
-                    style={{ left: `${(t.minSets / scaleMax) * 100}%`, width: `${((t.maxSets - t.minSets) / scaleMax) * 100}%` }}
+                    style={{ left: `${(tg.minSets / scaleMax) * 100}%`, width: `${((tg.maxSets - tg.minSets) / scaleMax) * 100}%` }}
                   />
                   <span className={`bar-fill bar-${tone}`} style={{ width: `${(v / scaleMax) * 100}%` }} />
                 </div>
@@ -97,23 +98,23 @@ export function Progress({ state }: { state: AppState }) {
 
       <section className="group">
         <div className="group-head">
-          <h3>Activity</h3>
-          <span className="muted small">Working sets per day, last 3 weeks</span>
+          <h3>{t("Activity")}</h3>
+          <span className="muted small">{t("Working sets per day, last 3 weeks")}</span>
         </div>
         <div className="card activity">
           <div className="act-grid" aria-hidden="true">
             <span style={{ bottom: `${(10 / actMax) * 100}%` }} />
             <span style={{ bottom: `${(20 / actMax) * 100}%` }} />
           </div>
-          <div className="act-bars" role="img" aria-label="Bar chart of working sets per day over the last 21 days">
+          <div className="act-bars" role="img" aria-label={t("Bar chart of working sets per day over the last 21 days")}>
             {activity.map((a, i) => (
               <div className="act-col" key={i}>
                 <span
                   className={`act-bar${i === activity.length - 1 ? " today" : ""}${a.sets === 0 ? " rest" : ""}`}
                   style={{ height: `${Math.max(3, (a.sets / actMax) * 100)}%` }}
-                  title={`${a.d.toLocaleDateString()}: ${a.sets} sets`}
+                  title={`${a.d.toLocaleDateString(lang())}: ${tn(a.sets, "{n} set", "{n} sets")}`}
                 />
-                <span className="act-lbl">{i % 7 === 6 || i === activity.length - 1 ? a.d.toLocaleDateString(undefined, { weekday: "narrow" }) : ""}</span>
+                <span className="act-lbl">{i % 7 === 6 || i === activity.length - 1 ? a.d.toLocaleDateString(lang(), { weekday: "narrow" }) : ""}</span>
               </div>
             ))}
           </div>
@@ -122,7 +123,7 @@ export function Progress({ state }: { state: AppState }) {
 
       <section className="group">
         <div className="group-head">
-          <h3>Recent workouts</h3>
+          <h3>{t("Recent workouts")}</h3>
         </div>
         <ul className="list card">
           {[...state.history]
@@ -131,13 +132,13 @@ export function Progress({ state }: { state: AppState }) {
             .map((w) => (
               <li className="row" key={w.id}>
                 <span className="date-chip">
-                  <span>{new Date(w.startedAt).toLocaleDateString(undefined, { month: "short" })}</span>
+                  <span>{new Date(w.startedAt).toLocaleDateString(lang(), { month: "short" })}</span>
                   <strong>{new Date(w.startedAt).getDate()}</strong>
                 </span>
                 <span className="row-text">
-                  <span className="row-title">{w.programDayId ? dayLabel(w.programDayId) : "Freestyle"}</span>
+                  <span className="row-title">{w.programDayId ? dayLabel(w.programDayId) : t("Freestyle")}</span>
                   <span className="row-sub">
-                    {workingSets(w)} sets · {(tonnage(w) / 1000).toFixed(1)} t
+                    {tn(workingSets(w), "{n} set", "{n} sets")} · {(tonnage(w) / 1000).toFixed(1)} t
                     {w.endedAt ? ` · ${Math.round((+new Date(w.endedAt) - +new Date(w.startedAt)) / 60000)} min` : ""}
                   </span>
                 </span>
@@ -145,7 +146,7 @@ export function Progress({ state }: { state: AppState }) {
             ))}
           {state.history.length === 0 && (
             <li className="row">
-              <span className="row-sub">No workouts yet. Start your first one from Today.</span>
+              <span className="row-sub">{t("No workouts yet. Start your first one from Today.")}</span>
             </li>
           )}
         </ul>

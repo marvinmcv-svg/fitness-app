@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CoachAction } from "../../src/coach/spec";
 import { adjustSession, type Readiness } from "../../src/domain/coach";
 import { swapKey, swapOptions } from "../../src/domain/personalize";
@@ -30,16 +30,17 @@ import {
   type Profile as MemberProfile,
   type TargetPreset,
 } from "./store";
+import { dayName, N_, setLang, t, tn } from "./i18n";
 import { Icon, type IconName } from "./ui/Icon";
 
 type Tab = "today" | "program" | "macros" | "progress" | "profile";
 const LEFT_TABS: { id: Tab; label: string; icon: IconName }[] = [
-  { id: "today", label: "Today", icon: "home" },
-  { id: "program", label: "Program", icon: "calendar" },
+  { id: "today", label: N_("Today"), icon: "home" },
+  { id: "program", label: N_("Program"), icon: "calendar" },
 ];
 const RIGHT_TABS: { id: Tab; label: string; icon: IconName }[] = [
-  { id: "macros", label: "Macros", icon: "pie" },
-  { id: "progress", label: "Progress", icon: "chart" },
+  { id: "macros", label: N_("Macros"), icon: "pie" },
+  { id: "progress", label: N_("Progress"), icon: "chart" },
 ];
 
 const PRESET_FOR: Record<MemberProfile["experience"], TargetPreset> = { new: "beginner", intermediate: "standard", advanced: "advanced" };
@@ -56,6 +57,23 @@ export function App() {
   const [summary, setSummary] = useState<{ workout: ReturnType<typeof finishSession>; before: AppState["history"] } | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  // Language first, so everything below renders in it.
+  setLang(state.settings.lang);
+
+  // Light/dark and color theme live on <html> so every screen and sheet picks them up.
+  const { appearance, accent } = state.settings;
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (appearance === "system") delete root.dataset.theme;
+    else root.dataset.theme = appearance;
+    root.dataset.accent = accent;
+    const dark = appearance === "dark" || (appearance === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+    const bg = getComputedStyle(root).getPropertyValue("--bg").trim();
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+      m.setAttribute("content", appearance === "system" ? (m.getAttribute("media")?.includes("dark") ? "#0b0a11" : "#f3f2f8") : bg || (dark ? "#0b0a11" : "#f3f2f8"));
+    });
+  }, [appearance, accent]);
 
   // Rebuild the personalized program whenever the profile changes.
   useMemo(() => setProgram(buildProgram(state.profile)), [state.profile]);
@@ -107,6 +125,8 @@ export function App() {
       <Frame>
         <main className="viewport bare">
           <Welcome
+            lang={state.settings.lang}
+            onLang={(lang) => update((s) => ({ ...s, settings: { ...s.settings, lang } }))}
             onGuest={() => {
               setShowAuth(false);
               update((s) => ({ ...s, account: s.account ?? { mode: "guest" } }));
@@ -130,7 +150,7 @@ export function App() {
               update((s) => ({ ...s, preset: PRESET_FOR[profile.experience] }));
               setEditingAnswers(false);
               setTab(first ? "today" : "profile");
-              setToast(first ? "Your plan is ready" : "Plan updated");
+              setToast(first ? t("Your plan is ready") : t("Plan updated"));
             }}
           />
         </main>
@@ -169,22 +189,22 @@ export function App() {
       case "swap_exercise": {
         const base = templateBySlug(profile.programSlug)?.days.find((d) => d.key === a.day_key)?.slots[a.slot_index];
         if (!base || !swapOptions(base, catalog.exercises, profile.equipment).some((e) => e.slug === a.exercise)) {
-          return "That swap doesn't fit your equipment or program anymore.";
+          return t("That swap doesn't fit your equipment or program anymore.");
         }
         const swaps = { ...profile.swaps, [swapKey(a.day_key, a.slot_index)]: a.exercise };
         saveProfile({ ...profile, swaps });
-        setToast("Exercise swapped");
+        setToast(t("Exercise swapped"));
         return null;
       }
       case "change_program":
-        if (state.active) return "Finish your current workout before switching programs.";
-        if (!templateBySlug(a.program_slug)) return "That program doesn't exist.";
+        if (state.active) return t("Finish your current workout before switching programs.");
+        if (!templateBySlug(a.program_slug)) return t("That program doesn't exist.");
         saveProfile({ ...profile, programSlug: a.program_slug, swaps: {} });
-        setToast("Program switched");
+        setToast(t("Program switched"));
         return null;
       case "set_volume_targets":
         update((s) => ({ ...s, preset: a.preset }));
-        setToast("Weekly targets updated");
+        setToast(t("Weekly targets updated"));
         return null;
       case "log_food": {
         const entry = {
@@ -198,7 +218,7 @@ export function App() {
         };
         update((s) => ({ ...s, food: [...s.food, entry] }));
         if (member) void cloud.saveFood(member, entry);
-        setToast(`Logged ${entry.macros.calories} kcal`);
+        setToast(t("Logged {n} kcal", { n: entry.macros.calories }));
         return null;
       }
       case "remember":
@@ -217,7 +237,7 @@ export function App() {
             onStart={start}
             onChangeProgram={(slug) => {
               saveProfile({ ...profile, programSlug: slug, swaps: {} });
-              setToast("Program switched");
+              setToast(t("Program switched"));
             }}
             onSwap={(dayKey, baseIndex, exercise) => {
               const swaps = { ...profile.swaps };
@@ -235,7 +255,7 @@ export function App() {
               update((s) => ({ ...s, food: [...s.food, ...entries] }));
               if (member) entries.forEach((e) => void cloud.saveFood(member, e));
               const kcal = entries.reduce((n, e) => n + e.macros.calories, 0);
-              setToast(`Logged ${kcal} kcal`);
+              setToast(t("Logged {n} kcal", { n: kcal }));
             }}
             onDelete={(id) => {
               update((s) => ({ ...s, food: s.food.filter((f) => f.id !== id) }));
@@ -267,18 +287,18 @@ export function App() {
         <button className="mini-player" onClick={() => setShowWorkout(true)}>
           <span className="mini-dot" aria-hidden="true" />
           <span className="mini-text">
-            <strong>{dayByKey(state.active.dayKey).label}</strong>
-            <span>{state.active.exercises.flatMap((e) => e.sets).filter((s) => s.done).length} sets done · tap to resume</span>
+            <strong>{dayName(dayByKey(state.active.dayKey).label)}</strong>
+            <span>{tn(state.active.exercises.flatMap((e) => e.sets).filter((s) => s.done).length, "{n} set done · tap to resume", "{n} sets done · tap to resume")}</span>
           </span>
           <Icon name="chevron" size={18} />
         </button>
       )}
 
-      <nav className="tabbar" aria-label="Main">
+      <nav className="tabbar" aria-label={t("Main")}>
         {LEFT_TABS.map((t) => (
           <TabButton key={t.id} {...t} active={tab === t.id} onClick={() => setTab(t.id)} />
         ))}
-        <button className={`tab-center${state.active ? " live" : ""}`} onClick={center} aria-label={state.active ? "Resume workout" : "Start next workout"}>
+        <button className={`tab-center${state.active ? " live" : ""}`} onClick={center} aria-label={state.active ? t("Resume workout") : t("Start next workout")}>
           <Icon name={state.active ? "dumbbell" : "plus"} size={26} stroke={2.4} />
         </button>
         {RIGHT_TABS.map((t) => (
@@ -295,7 +315,7 @@ export function App() {
           onDiscard={() => {
             update((s) => ({ ...s, active: null }));
             setShowWorkout(false);
-            setToast("Workout discarded");
+            setToast(t("Workout discarded"));
           }}
           onCoach={(prompt) => setCoach({ prompt })}
           onFinish={() => {
@@ -318,7 +338,7 @@ export function App() {
           onClose={() => setSummary(null)}
           onAskCoach={() => {
             setSummary(null);
-            setCoach({ prompt: "I just finished my workout. How did it go, and what should I focus on next time?" });
+            setCoach({ prompt: t("I just finished my workout. How did it go, and what should I focus on next time?") });
           }}
         />
       )}
@@ -356,7 +376,7 @@ function TabButton({ label, icon, active, onClick }: { label: string; icon: Icon
   return (
     <button className={`tab${active ? " on" : ""}`} onClick={onClick} aria-current={active ? "page" : undefined}>
       <Icon name={icon} size={23} stroke={active ? 2.3 : 1.9} />
-      <span>{label}</span>
+      <span>{t(label)}</span>
     </button>
   );
 }

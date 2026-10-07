@@ -56,8 +56,9 @@ export const FOODS: Food[] = [
   f("honey", "Honey", 304, 0.3, 82.4, 0, 21, "1 tbsp"),
 ];
 
-export function searchFoods(query: string, limit = 12): Food[] {
+/** Matches the English name, and the display name when `displayName` is given (e.g. a translation). */
+export function searchFoods(query: string, limit = 12, displayName?: (name: string) => string): Food[] {
   const q = query.trim().toLowerCase();
   if (!q) return FOODS.slice(0, limit);
-  return FOODS.filter((food) => food.name.toLowerCase().includes(q)).slice(0, limit);
+  return FOODS.filter((food) => `${food.name} ${displayName?.(food.name) ?? ""}`.toLowerCase().includes(q)).slice(0, limit);
 }

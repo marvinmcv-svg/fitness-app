@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CoachAction } from "../../../src/coach/spec";
 import { detectRedFlag, RED_FLAG_REPLY, weeklyReview } from "../../../src/domain/coach";
+import { templateBySlug } from "../../../src/data/templates";
 import { askCoach, buildContext } from "../coachClient";
 import { exerciseName, rollingVolume, targetsFor, targetsMacros, uid, type AppState, type CoachMessage } from "../store";
+import { lang, N_, t } from "../i18n";
 import { Icon } from "../ui/Icon";
 
 const STARTERS = [
-  "How did my week go?",
-  "I only have 30 minutes today",
-  "My lower back feels tight. What should I change?",
-  "Why has my bench stopped going up?",
-  "I had 3 eggs and 2 slices of toast for breakfast",
-  "What should I eat after training?",
+  N_("How did my week go?"),
+  N_("I only have 30 minutes today"),
+  N_("My lower back feels tight. What should I change?"),
+  N_("Why has my bench stopped going up?"),
+  N_("I had 3 eggs and 2 slices of toast for breakfast"),
+  N_("What should I eat after training?"),
 ];
 
 interface Props {
@@ -47,8 +49,10 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
       targets: targetsFor(state.preset),
       dailyCalories: days,
       calorieTarget: targetsMacros(state.profile)?.calories ?? null,
+      tr: t,
     });
-  }, [state.history, state.food, state.profile, state.preset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.history, state.food, state.profile, state.preset, lang()]);
 
   useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
@@ -64,7 +68,7 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
 
     const flag = detectRedFlag(content);
     if (flag) {
-      onMessages((c) => [...c, { id: uid(), role: "assistant", content: RED_FLAG_REPLY[flag], at: new Date().toISOString(), safety: true }]);
+      onMessages((c) => [...c, { id: uid(), role: "assistant", content: t(RED_FLAG_REPLY[flag]), at: new Date().toISOString(), safety: true }]);
       return;
     }
 
@@ -73,7 +77,7 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
     const result = await askCoach(turns, buildContext(state));
     setBusy(false);
     if (!result.ok) {
-      setError(result.code === "not_configured" ? "The AI coach isn't connected yet. Your daily brief and readiness check still work." : result.error);
+      setError(result.code === "not_configured" ? t("The AI coach isn't connected yet. Your daily brief and readiness check still work.") : result.error);
       return;
     }
     const remembered = result.actions.filter((a): a is Extract<CoachAction, { type: "remember" }> => a.type === "remember");
@@ -102,9 +106,9 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
     onMessages((c) => c.map((m) => (m.id === msgId ? { ...m, actions: m.actions?.map((a, i) => (i === idx ? { ...a, status } : a)) } : m)));
 
   return (
-    <div className="coach" role="dialog" aria-label="Coach">
+    <div className="coach" role="dialog" aria-label={t("Coach")}>
       <header className="coach-nav">
-        <button className="icon-btn" onClick={onClose} aria-label="Close coach">
+        <button className="icon-btn" onClick={onClose} aria-label={t("Close coach")}>
           <Icon name="chevronDown" />
         </button>
         <div className="coach-id">
@@ -112,55 +116,55 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
             <Icon name="sparkle" size={18} stroke={2.2} />
           </span>
           <span>
-            <strong>Coach</strong>
-            <em>{busy ? "Thinking…" : "Knows your training and meals"}</em>
+            <strong>{t("Coach")}</strong>
+            <em>{busy ? t("Thinking…") : t("Knows your training and meals")}</em>
           </span>
         </div>
         <button className={`btn-small${showMemory ? " accent" : ""}`} onClick={() => setShowMemory(!showMemory)} aria-expanded={showMemory}>
-          Memory {state.coach.memory.length ? `· ${state.coach.memory.length}` : ""}
+          {t("Memory")} {state.coach.memory.length ? `· ${state.coach.memory.length}` : ""}
         </button>
       </header>
 
       {showMemory && (
         <div className="memory">
-          <p className="muted small">The coach keeps these in mind in every conversation. Tell it something new, or remove anything that's out of date.</p>
+          <p className="muted small">{t("The coach keeps these in mind in every conversation. Tell it something new, or remove anything that's out of date.")}</p>
           {state.coach.memory.length ? (
             <ul className="memory-list">
               {state.coach.memory.map((m) => (
                 <li key={m.id}>
                   <span>{m.note}</span>
-                  <button className="row-del" onClick={() => onForget(m.id)} aria-label={`Forget: ${m.note}`}>
+                  <button className="row-del" onClick={() => onForget(m.id)} aria-label={t("Forget: {note}", { note: m.note })}>
                     <Icon name="close" size={14} />
                   </button>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="small">Nothing saved yet. Try “I have a bad left knee” or “I train at 6 am before work.”</p>
+            <p className="small">{t("Nothing saved yet. Try “I have a bad left knee” or “I train at 6 am before work.”")}</p>
           )}
         </div>
       )}
 
       <div className="coach-scroll" ref={scroller}>
         <section className="card review">
-          <p className="eyebrow">This week</p>
+          <p className="eyebrow">{t("This week")}</p>
           <p className="review-headline">{review.headline}</p>
           <div className="review-stats">
             <span>
               <strong>
                 {review.sessions}/{review.plannedSessions}
               </strong>
-              sessions
+              {t("sessions")}
             </span>
             <span>
               <strong>
                 {review.musclesOnTarget}/{review.musclesTracked}
               </strong>
-              muscles on target
+              {t("muscles on target")}
             </span>
             <span>
               <strong>{review.avgCalories ? review.avgCalories.toLocaleString() : "—"}</strong>
-              {review.calorieTarget ? `avg kcal of ${review.calorieTarget.toLocaleString()}` : "avg kcal"}
+              {review.calorieTarget ? t("avg kcal of {target}", { target: review.calorieTarget.toLocaleString(lang()) }) : t("avg kcal")}
             </span>
           </div>
         </section>
@@ -168,12 +172,12 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
         {chat.length === 0 && (
           <div className="coach-empty">
             <p className="coach-hello">
-              Hi{state.profile?.name ? ` ${state.profile.name}` : ""}. I can see your program, your last 7 days of training and today's meals. Ask me anything, or tell me how you feel today.
+              {state.profile?.name ? t("Hi {name}.", { name: state.profile.name }) : t("Hi.")} {t("I can see your program, your last 7 days of training and today's meals. Ask me anything, or tell me how you feel today.")}
             </p>
             <div className="starters">
               {STARTERS.map((s) => (
-                <button key={s} className="starter" onClick={() => void send(s)}>
-                  {s}
+                <button key={s} className="starter" onClick={() => void send(t(s))}>
+                  {t(s)}
                 </button>
               ))}
             </div>
@@ -185,7 +189,7 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
             <div className={`bubble ${m.role}${m.safety ? " safety" : ""}`}>
               {m.safety && (
                 <span className="safety-tag">
-                  <Icon name="warning" size={14} /> Safety first
+                  <Icon name="warning" size={14} /> {t("Safety first")}
                 </span>
               )}
               {m.content.split(/\n{2,}/).map((para, i) => (
@@ -210,7 +214,7 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
 
         {busy && (
           <div className="bubble-row assistant">
-            <div className="bubble assistant typing" aria-label="Coach is typing">
+            <div className="bubble assistant typing" aria-label={t("Coach is typing")}>
               <span />
               <span />
               <span />
@@ -231,7 +235,7 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
           id="coach-input"
           rows={1}
           value={draft}
-          placeholder="Ask your coach…"
+          placeholder={t("Ask your coach…")}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -239,13 +243,13 @@ export function Coach({ state, onClose, onMessages, onApply, onForget, onRemembe
               void send(draft);
             }
           }}
-          aria-label="Message the coach"
+          aria-label={t("Message the coach")}
         />
-        <button className="send" type="submit" disabled={!draft.trim() || busy} aria-label="Send">
+        <button className="send" type="submit" disabled={!draft.trim() || busy} aria-label={t("Send")}>
           <Icon name="arrowUp" size={18} stroke={2.6} />
         </button>
       </form>
-      <p className="coach-disclaimer">The coach can make mistakes and isn't medical advice.</p>
+      <p className="coach-disclaimer">{t("The coach can make mistakes and isn't medical advice.")}</p>
     </div>
   );
 }
@@ -264,14 +268,14 @@ function ActionCard({ action, status, onApply, onDismiss }: { action: CoachActio
       {status === "pending" ? (
         <div className="action-btns">
           <button className="btn-small accent" onClick={onApply}>
-            Apply
+            {t("Apply")}
           </button>
           <button className="btn-small" onClick={onDismiss}>
-            No thanks
+            {t("No thanks")}
           </button>
         </div>
       ) : (
-        <span className={`action-status ${status}`}>{status === "applied" ? "Applied" : "Dismissed"}</span>
+        <span className={`action-status ${status}`}>{status === "applied" ? t("Applied") : t("Dismissed")}</span>
       )}
     </div>
   );
@@ -280,23 +284,24 @@ function ActionCard({ action, status, onApply, onDismiss }: { action: CoachActio
 function describe(a: CoachAction): { icon: "swap" | "calendar" | "chart" | "pie"; title: string; body: string } {
   switch (a.type) {
     case "swap_exercise":
-      return { icon: "swap", title: `Swap in ${exerciseName(a.exercise)}`, body: a.reason };
+      return { icon: "swap", title: t("Swap in {exercise}", { exercise: exerciseName(a.exercise) }), body: a.reason };
     case "change_program":
-      return { icon: "calendar", title: `Switch to ${a.program_slug === "full-body" ? "Full Body 3×" : a.program_slug === "upper-lower" ? "Upper / Lower" : "the 6-day split"}`, body: a.reason };
+      return { icon: "calendar", title: t("Switch to {program}", { program: t(templateBySlug(a.program_slug)?.name ?? a.program_slug) }), body: a.reason };
     case "set_volume_targets":
-      return { icon: "chart", title: `Set weekly targets to ${a.preset}`, body: a.reason };
+      return { icon: "chart", title: t("Set weekly targets to {preset}", { preset: t(PRESET_NAME[a.preset]) }), body: a.reason };
     case "log_food":
       return {
         icon: "pie",
-        title: `Log ${a.name}`,
-        body: `${capitalize(a.meal)} · ${Math.round(a.calories)} kcal · P ${Math.round(a.protein)} · C ${Math.round(a.carbs)} · F ${Math.round(a.fat)}`,
+        title: t("Log {food}", { food: a.name }),
+        body: `${t(MEAL_NAME[a.meal])} · ${Math.round(a.calories)} kcal · P ${Math.round(a.protein)} · C ${Math.round(a.carbs)} · F ${Math.round(a.fat)}`,
       };
     case "remember":
-      return { icon: "chart", title: "Remembered", body: a.note };
+      return { icon: "chart", title: t("Remembered"), body: a.note };
   }
 }
 
-const capitalize = (s: string) => s[0]!.toUpperCase() + s.slice(1);
+const MEAL_NAME = { breakfast: N_("Breakfast"), lunch: N_("Lunch"), dinner: N_("Dinner"), snack: N_("Snack") } as const;
+const PRESET_NAME = { beginner: N_("beginner"), standard: N_("standard"), advanced: N_("advanced") } as const;
 
 function sameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();

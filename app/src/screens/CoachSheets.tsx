@@ -3,6 +3,7 @@ import { adjustSession, estimateMinutes, findRecords, type PlannedSlot, type Rea
 import { defaultRestSec } from "../../../src/domain/template";
 import type { Workout as LoggedWorkout } from "../../../src/domain/types";
 import { catalog, dayByKey, dayLabel, exerciseName, muscleName, nextDayKey, tonnage, workingSets } from "../store";
+import { dayName, t, tn } from "../i18n";
 import { Icon } from "../ui/Icon";
 
 export function plannedSlots(dayKey: string): PlannedSlot[] {
@@ -20,29 +21,29 @@ const SORE_CHOICES = ["chest", "upper_back", "lats", "side_delts", "biceps", "tr
 export function ReadinessSheet({ dayKey, onStart, onClose }: { dayKey: string; onStart: (r: Readiness | null) => void; onClose: () => void }) {
   const [r, setR] = useState<Readiness>({ sleep: "ok", energy: "normal", sore: [], minutes: null });
   const plan = useMemo(() => plannedSlots(dayKey), [dayKey]);
-  const preview = useMemo(() => adjustSession(plan, r), [plan, r]);
+  const preview = useMemo(() => adjustSession(plan, r, t), [plan, r]);
   const full = estimateMinutes(plan.map((s) => ({ sets: s.sets.max, restSec: s.restSec })));
   const changed = preview.slots.some((s, i) => !s.keep || s.sets !== plan[i]!.sets.max);
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
-      <div className="sheet sheet-tall" role="dialog" aria-label="Readiness check" onClick={(e) => e.stopPropagation()}>
+      <div className="sheet sheet-tall" role="dialog" aria-label={t("Readiness check")} onClick={(e) => e.stopPropagation()}>
         <span className="sheet-grabber" aria-hidden="true" />
         <div className="sheet-top">
           <div>
-            <p className="eyebrow">Coach check-in</p>
-            <h3>How are you today?</h3>
+            <p className="eyebrow">{t("Coach check-in")}</p>
+            <h3>{t("How are you today?")}</h3>
           </div>
           <span className="coach-avatar" aria-hidden="true">
             <Icon name="sparkle" size={18} stroke={2.2} />
           </span>
         </div>
 
-        <Choice label="Sleep last night" value={r.sleep} options={[["poor", "Poor"], ["ok", "OK"], ["great", "Great"]]} onChange={(sleep) => setR({ ...r, sleep })} />
-        <Choice label="Energy" value={r.energy} options={[["low", "Low"], ["normal", "Normal"], ["high", "High"]]} onChange={(energy) => setR({ ...r, energy })} />
+        <Choice label={t("Sleep last night")} value={r.sleep} options={[["poor", t("Poor")], ["ok", t("OK")], ["great", t("Great")]]} onChange={(sleep) => setR({ ...r, sleep })} />
+        <Choice label={t("Energy")} value={r.energy} options={[["low", t("Low")], ["normal", t("Normal")], ["high", t("High")]]} onChange={(energy) => setR({ ...r, energy })} />
 
         <div className="check-group">
-          <p className="check-label">Anything sore?</p>
+          <p className="check-label">{t("Anything sore?")}</p>
           <div className="chip-grid">
             {SORE_CHOICES.map((m) => {
               const on = r.sore.includes(m);
@@ -56,7 +57,7 @@ export function ReadinessSheet({ dayKey, onStart, onClose }: { dayKey: string; o
         </div>
 
         <div className="check-group">
-          <p className="check-label">Time you have</p>
+          <p className="check-label">{t("Time you have")}</p>
           <div className="chip-grid">
             {[30, 45, 60, 75].map((m) => (
               <button key={m} className={`chip${r.minutes === m ? " on" : ""}`} aria-pressed={r.minutes === m} onClick={() => setR({ ...r, minutes: r.minutes === m ? null : m })}>
@@ -64,14 +65,14 @@ export function ReadinessSheet({ dayKey, onStart, onClose }: { dayKey: string; o
               </button>
             ))}
             <button className={`chip${r.minutes === null ? " on" : ""}`} aria-pressed={r.minutes === null} onClick={() => setR({ ...r, minutes: null })}>
-              No limit
+              {t("No limit")}
             </button>
           </div>
         </div>
 
         <div className={`coach-plan${changed ? " changed" : ""}`}>
           <p className="coach-plan-head">
-            <Icon name="sparkle" size={15} /> {changed ? `Adjusted: about ${preview.minutes} min (planned ${full})` : `Full session, about ${full} min`}
+            <Icon name="sparkle" size={15} /> {changed ? t("Adjusted: about {min} min (planned {full})", { min: preview.minutes, full }) : t("Full session, about {min} min", { min: full })}
           </p>
           {preview.notes.map((n, i) => (
             <p key={i}>{n}</p>
@@ -80,10 +81,10 @@ export function ReadinessSheet({ dayKey, onStart, onClose }: { dayKey: string; o
         </div>
 
         <button className="btn-primary" onClick={() => onStart(r)}>
-          {changed ? "Start adjusted workout" : "Start workout"}
+          {changed ? t("Start adjusted workout") : t("Start workout")}
         </button>
         <button className="btn-plain" onClick={() => onStart(null)}>
-          Skip check-in
+          {t("Skip check-in")}
         </button>
       </div>
     </div>
@@ -121,22 +122,22 @@ export function WorkoutSummary({
   const next = nextDayKey([...before, workout]);
   return (
     <div className="sheet-backdrop" onClick={onClose}>
-      <div className="sheet sheet-tall" role="dialog" aria-label="Workout summary" onClick={(e) => e.stopPropagation()}>
+      <div className="sheet sheet-tall" role="dialog" aria-label={t("Workout summary")} onClick={(e) => e.stopPropagation()}>
         <span className="sheet-grabber" aria-hidden="true" />
-        <p className="eyebrow">Workout saved</p>
-        <h3>{workout.programDayId ? dayLabel(workout.programDayId) : "Workout"} done</h3>
+        <p className="eyebrow">{t("Workout saved")}</p>
+        <h3>{t("{day} done", { day: workout.programDayId ? dayLabel(workout.programDayId) : t("Workout") })}</h3>
         <div className="macro-summary">
           <span>
-            <strong>{workingSets(workout)}</strong>sets
+            <strong>{workingSets(workout)}</strong>{t("sets")}
           </span>
           <span>
-            <strong>{(tonnage(workout) / 1000).toFixed(1)}</strong>tonnes
+            <strong>{(tonnage(workout) / 1000).toFixed(1)}</strong>{t("tonnes")}
           </span>
           <span>
-            <strong>{minutes ?? "—"}</strong>min
+            <strong>{minutes ?? "—"}</strong>{t("min")}
           </span>
           <span>
-            <strong>{records.length}</strong>records
+            <strong>{records.length}</strong>{t("records")}
           </span>
         </div>
         {records.length > 0 && (
@@ -149,9 +150,9 @@ export function WorkoutSummary({
                 <span className="row-text">
                   <span className="row-title">{exerciseName(r.exercise)}</span>
                   <span className="row-sub">
-                    {r.set}
-                    {r.kind === "e1rm" ? ` · est. 1RM ${r.value} kg` : ""}
-                    {r.previous ? ` (was ${r.previous})` : ""}
+                    {r.kind === "reps" ? tn(r.value, "{n} rep", "{n} reps") : r.set}
+                    {r.kind === "e1rm" ? ` · ${t("est. 1RM {value} kg", { value: r.value })}` : ""}
+                    {r.previous ? ` ${t("(was {previous})", { previous: r.previous })}` : ""}
                   </span>
                 </span>
               </li>
@@ -159,14 +160,13 @@ export function WorkoutSummary({
           </ul>
         )}
         <p className="muted">
-          {records.length ? "Strong session. " : "Every session counts. "}
-          Next up: <strong>{dayByKey(next).label}</strong>. Weights for it are already updated from today.
+          {records.length ? t("Strong session.") : t("Every session counts.")} {t("Next up:")} <strong>{dayName(dayByKey(next).label)}</strong>. {t("Weights for it are already updated from today.")}
         </p>
         <button className="btn-primary" onClick={onAskCoach}>
-          <Icon name="sparkle" size={16} /> Ask coach about this workout
+          <Icon name="sparkle" size={16} /> {t("Ask coach about this workout")}
         </button>
         <button className="btn-plain" onClick={onClose}>
-          Done
+          {t("Done")}
         </button>
       </div>
     </div>

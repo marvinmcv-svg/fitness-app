@@ -3,6 +3,7 @@ import { TEMPLATES, templateBySlug } from "../../../src/data/templates";
 import { swapOptions, type PersonalizedSlot } from "../../../src/domain/personalize";
 import { checkPlan, projectWeek } from "../../../src/domain/planner";
 import { catalog, dayByKey, exerciseName, muscleName, nextDayKey, program, targetsFor, techniqueName, type AppState } from "../store";
+import { dayName, N_, t } from "../i18n";
 import { Icon } from "../ui/Icon";
 import { fmt, SLOT_LABEL } from "./Today";
 
@@ -31,15 +32,15 @@ export function Program({ state, onStart, onChangeProgram, onSwap }: Props) {
     <div className="screen">
       <header className="large-title compact">
         <div className="lt-text">
-          <p className="eyebrow">Your program</p>
-          <h1>{program.name}</h1>
+          <p className="eyebrow">{t("Your program")}</p>
+          <h1>{t(program.name)}</h1>
         </div>
         <button className="btn-small" onClick={() => setSheet("programs")} disabled={!!state.active}>
-          Change
+          {t("Change")}
         </button>
       </header>
 
-      <div className="day-strip" role="tablist" aria-label="Training days">
+      <div className="day-strip" role="tablist" aria-label={t("Training days")}>
         {program.weekLayout.map((key, i) => {
           const d = dayByKey(key);
           const [focus, variant] = splitLabel(d.label);
@@ -51,10 +52,10 @@ export function Program({ state, onStart, onChangeProgram, onSwap }: Props) {
               className={`day-chip${key === selected ? " on" : ""}`}
               onClick={() => setSelected(key)}
             >
-              <span className="day-chip-n">Day {i + 1}</span>
+              <span className="day-chip-n">{t("Day {n}", { n: i + 1 })}</span>
               <span className="day-chip-focus">{focus}</span>
               <span className="day-chip-var">{variant}</span>
-              {key === upNext && <span className="day-chip-next">Next</span>}
+              {key === upNext && <span className="day-chip-next">{t("Next")}</span>}
             </button>
           );
         })}
@@ -62,9 +63,9 @@ export function Program({ state, onStart, onChangeProgram, onSwap }: Props) {
 
       <section className="group">
         <div className="group-head">
-          <h3>{day.label}</h3>
+          <h3>{dayName(day.label)}</h3>
           <button className="link-btn" onClick={() => onStart(selected)} disabled={!!state.active}>
-            {state.active ? "Workout in progress" : "Start this day"}
+            {state.active ? t("Workout in progress") : t("Start this day")}
             {!state.active && <Icon name="chevron" size={16} />}
           </button>
         </div>
@@ -73,20 +74,20 @@ export function Program({ state, onStart, onChangeProgram, onSwap }: Props) {
             const ex = catalog.exercises.get(slot.exercise)!;
             return (
               <li className="row row-top" key={i}>
-                <button className="row-btn row-top" onClick={() => setSheet({ slot })} aria-label={`Swap ${exerciseName(slot.exercise)}`}>
-                <span className={`slot-badge slot-${slot.slotType}`}>{SLOT_LABEL[slot.slotType]}</span>
+                <button className="row-btn row-top" onClick={() => setSheet({ slot })} aria-label={t("Swap {exercise}", { exercise: exerciseName(slot.exercise) })}>
+                <span className={`slot-badge slot-${slot.slotType}`}>{t(SLOT_LABEL[slot.slotType])}</span>
                 <span className="row-text">
                   <span className="row-title">
                     {exerciseName(slot.exercise)}
                     {slot.change && (
                       <span className={`change-tag change-${slot.change}`}>
-                        {slot.change === "swap" ? "Your pick" : slot.change === "equipment" ? "For your equipment" : "+1 set focus"}
+                        {slot.change === "swap" ? t("Your pick") : slot.change === "equipment" ? t("For your equipment") : t("+1 set focus")}
                       </span>
                     )}
                   </span>
                   <span className="row-sub">
                     {slot.sets.min === slot.sets.max ? slot.sets.max : `${slot.sets.min}–${slot.sets.max}`} ×{" "}
-                    {slot.reps ? (slot.reps.min === slot.reps.max ? slot.reps.max : `${slot.reps.min}–${slot.reps.max}`) : "failure"}
+                    {slot.reps ? (slot.reps.min === slot.reps.max ? slot.reps.max : `${slot.reps.min}–${slot.reps.max}`) : t("failure")}
                     {slot.progression ? ` · ${progressionLabel(slot.progression.type)}` : ""}
                   </span>
                   <span className="tags">
@@ -111,14 +112,14 @@ export function Program({ state, onStart, onChangeProgram, onSwap }: Props) {
             );
           })}
         </ul>
-        <p className="muted small footnote">Tap an exercise to swap it for one that suits you.</p>
+        <p className="muted small footnote">{t("Tap an exercise to swap it for one that suits you.")}</p>
       </section>
 
       <section className="group">
         <div className="group-head">
-          <h3>Weekly plan check</h3>
+          <h3>{t("Weekly plan check")}</h3>
           <span className={`pill ${warnings.length ? "pill-warn" : "pill-good"}`}>
-            {warnings.length ? `${warnings.length} to review` : "All targets covered"}
+            {warnings.length ? t("{n} to review", { n: warnings.length }) : t("All targets covered")}
           </span>
         </div>
         {warnings.length > 0 && (
@@ -131,20 +132,20 @@ export function Program({ state, onStart, onChangeProgram, onSwap }: Props) {
                 <span className="row-text">
                   <span className="row-title">{muscleName.get(w.muscle)}</span>
                   <span className="row-sub">
-                    {w.kind === "below_target" && `Plans at most ${fmt(w.planned)} sets a week; your minimum is ${w.target}.`}
-                    {w.kind === "above_target" && `Plans at least ${fmt(w.planned)} sets a week; your maximum is ${w.target}.`}
-                    {w.kind === "low_frequency" && `Trained ${w.planned}× a week; your target is ${w.target}×.`}
+                    {w.kind === "below_target" && t("Plans at most {planned} sets a week; your minimum is {target}.", { planned: fmt(w.planned), target: w.target })}
+                    {w.kind === "above_target" && t("Plans at least {planned} sets a week; your maximum is {target}.", { planned: fmt(w.planned), target: w.target })}
+                    {w.kind === "low_frequency" && t("Trained {planned}× a week; your target is {target}×.", { planned: w.planned, target: w.target })}
                   </span>
                 </span>
               </li>
             ))}
           </ul>
         )}
-        <div className="card plan-table" role="table" aria-label="Planned weekly sets per muscle">
+        <div className="card plan-table" role="table" aria-label={t("Planned weekly sets per muscle")}>
           <div className="plan-row plan-head" role="row">
-            <span role="columnheader">Muscle</span>
-            <span role="columnheader">Sets / week</span>
-            <span role="columnheader">Days</span>
+            <span role="columnheader">{t("Muscle")}</span>
+            <span role="columnheader">{t("Sets / week")}</span>
+            <span role="columnheader">{t("Days")}</span>
           </div>
           {targets.map((t) => {
             const p = planned.get(t.muscle);
@@ -165,31 +166,31 @@ export function Program({ state, onStart, onChangeProgram, onSwap }: Props) {
             );
           })}
         </div>
-        <p className="muted small footnote">Secondary muscles count as half a set. Primer work is excluded.</p>
+        <p className="muted small footnote">{t("Secondary muscles count as half a set. Primer work is excluded.")}</p>
       </section>
 
       {sheet === "programs" && (
         <div className="sheet-backdrop" onClick={() => setSheet(null)}>
-          <div className="sheet sheet-tall" role="dialog" aria-label="Choose a program" onClick={(e) => e.stopPropagation()}>
+          <div className="sheet sheet-tall" role="dialog" aria-label={t("Choose a program")} onClick={(e) => e.stopPropagation()}>
             <span className="sheet-grabber" aria-hidden="true" />
-            <h3>Choose a program</h3>
-            <p className="muted">Your exercise swaps reset when you switch. Logged workouts stay.</p>
+            <h3>{t("Choose a program")}</h3>
+            <p className="muted">{t("Your exercise swaps reset when you switch. Logged workouts stay.")}</p>
             <div className="plan-cards">
-              {TEMPLATES.map((t) => (
+              {TEMPLATES.map((tp) => (
                 <button
-                  key={t.slug}
-                  className={`plan-card${program.slug === t.slug ? " on" : ""}`}
-                  aria-pressed={program.slug === t.slug}
+                  key={tp.slug}
+                  className={`plan-card${program.slug === tp.slug ? " on" : ""}`}
+                  aria-pressed={program.slug === tp.slug}
                   onClick={() => {
-                    if (t.slug !== program.slug) onChangeProgram(t.slug);
+                    if (tp.slug !== program.slug) onChangeProgram(tp.slug);
                     setSheet(null);
                   }}
                 >
                   <span className="plan-card-top">
-                    <strong>{t.name}</strong>
-                    {program.slug === t.slug && <span className="pill">Current</span>}
+                    <strong>{t(tp.name)}</strong>
+                    {program.slug === tp.slug && <span className="pill">{t("Current")}</span>}
                   </span>
-                  <span className="plan-card-body">{t.description}</span>
+                  <span className="plan-card-body">{tp.description ? t(tp.description) : null}</span>
                 </button>
               ))}
             </div>
@@ -230,20 +231,20 @@ function SwapSheet({
   const options = swapOptions(base, catalog.exercises, equipment);
   return (
     <div className="sheet-backdrop" onClick={onClose}>
-      <div className="sheet sheet-tall" role="dialog" aria-label="Swap exercise" onClick={(e) => e.stopPropagation()}>
+      <div className="sheet sheet-tall" role="dialog" aria-label={t("Swap exercise")} onClick={(e) => e.stopPropagation()}>
         <span className="sheet-grabber" aria-hidden="true" />
-        <h3>Swap {exerciseName(slot.exercise)}</h3>
-        <p className="muted">Same movement and muscles, so your plan stays balanced.</p>
+        <h3>{t("Swap {exercise}", { exercise: exerciseName(slot.exercise) })}</h3>
+        <p className="muted">{t("Same movement and muscles, so your plan stays balanced.")}</p>
         <ul className="list card">
           {options.map((o) => (
             <li className="row" key={o.slug}>
               <button className="row-btn" onClick={() => onPick(o.slug === base.exercise ? null : o.slug)}>
                 <span className="row-text">
                   <span className="row-title">
-                    {o.name}
-                    {o.slug === base.exercise && <span className="change-tag">Program default</span>}
+                    {exerciseName(o.slug)}
+                    {o.slug === base.exercise && <span className="change-tag">{t("Program default")}</span>}
                   </span>
-                  <span className="row-sub">{o.equipment.join(", ").replace(/_/g, " ")}</span>
+                  <span className="row-sub">{o.equipment.map((e) => t(EQUIPMENT_NAME[e] ?? e.replace(/_/g, " "))).join(", ")}</span>
                 </span>
                 {o.slug === slot.exercise && <Icon name="check" size={18} stroke={2.6} className="text-accent" />}
               </button>
@@ -256,10 +257,24 @@ function SwapSheet({
 }
 
 function splitLabel(label: string): [string, string] {
-  const m = label.match(/^(.*)\s([AB])$/);
-  return m ? [m[1]!.replace(" + ", " & "), `Variation ${m[2]}`] : [label, ""];
+  const m = label.match(/^(.*)\s([ABC])$/);
+  return m ? [t(m[1]!).replace(" + ", " & "), t("Variation {v}", { v: m[2]! })] : [t(label), ""];
 }
 
 function progressionLabel(type: string) {
-  return type === "double_progression" ? "double progression" : type === "linear" ? "linear +load" : "beat your reps";
+  return type === "double_progression" ? t("double progression") : type === "linear" ? t("linear +load") : t("beat your reps");
 }
+
+const EQUIPMENT_NAME: Record<string, string> = {
+  band: N_("band"),
+  bar: N_("pull-up bar"),
+  barbell: N_("barbell"),
+  bench: N_("bench"),
+  bodyweight: N_("bodyweight"),
+  cable: N_("cable"),
+  dip_station: N_("dip station"),
+  dumbbell: N_("dumbbell"),
+  machine: N_("machine"),
+  rack: N_("rack"),
+  rope: N_("rope"),
+};

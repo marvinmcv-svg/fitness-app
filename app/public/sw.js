@@ -1,8 +1,10 @@
-// Offline support: the app shell is cached so Setwise opens without signal.
+// Offline support: the app shell is cached so FuerzaFlow opens without signal.
 // Pages are network-first (you always get the latest version when online);
 // other same-origin files and Google Fonts are served from cache, refreshed in the background.
-const CACHE = "setwise-v1";
-const SHELL = ["/", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/apple-touch-icon.png"];
+const CACHE = "fuerzaflow-v1";
+// Relative to this script, so the app works under any base path (it is served from /app/).
+const HOME = new URL("./", self.location).href;
+const SHELL = ["./", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -27,10 +29,10 @@ self.addEventListener("fetch", (event) => {
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put("/", copy));
+          caches.open(CACHE).then((c) => c.put(HOME, copy));
           return res;
         })
-        .catch(() => caches.match("/")),
+        .catch(() => caches.match(HOME)),
     );
     return;
   }

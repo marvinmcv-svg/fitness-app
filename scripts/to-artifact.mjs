@@ -13,5 +13,5 @@ const keep = [
 
 // Module scripts in <head> run deferred, so the root div exists when they execute.
 const out = [...keep.filter((t) => !t.startsWith("<script")), body.trim(), ...keep.filter((t) => t.startsWith("<script"))].join("\n");
-writeFileSync("dist/setwise.html", out + "\n");
-console.log(`dist/setwise.html (${(out.length / 1024).toFixed(0)} KB)`);
+writeFileSync("dist/fuerzaflow.html", out + "\n");
+console.log(`dist/fuerzaflow.html (${(out.length / 1024).toFixed(0)} KB)`);

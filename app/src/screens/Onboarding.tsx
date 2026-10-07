@@ -1,34 +1,34 @@
 import { useMemo, useState } from "react";
-import { MUSCLES } from "../../../src/data/catalog";
 import { TEMPLATES } from "../../../src/data/templates";
 import { macroTargets, type Activity, type Sex } from "../../../src/domain/nutrition";
 import { recommendTemplate, type EquipmentProfile, type Experience, type Goal } from "../../../src/domain/personalize";
-import type { Profile } from "../store";
+import { dayName, N_, t } from "../i18n";
+import { muscleName, type Profile } from "../store";
 import { Icon, type IconName } from "../ui/Icon";
 
 type Draft = Omit<Profile, "programSlug" | "swaps"> & { programSlug: string | null };
 
 const GOALS: { id: Goal; title: string; body: string; icon: IconName }[] = [
-  { id: "muscle", title: "Build muscle", body: "Grow size with smart weekly volume", icon: "dumbbell" },
-  { id: "strength", title: "Get stronger", body: "Push your main lifts up every month", icon: "bolt" },
-  { id: "fat_loss", title: "Lose fat", body: "Keep your muscle while you lean out", icon: "flame" },
-  { id: "fitness", title: "Stay fit", body: "Train consistently and feel good", icon: "sparkle" },
+  { id: "muscle", title: N_("Build muscle"), body: N_("Grow size with smart weekly volume"), icon: "dumbbell" },
+  { id: "strength", title: N_("Get stronger"), body: N_("Push your main lifts up every month"), icon: "bolt" },
+  { id: "fat_loss", title: N_("Lose fat"), body: N_("Keep your muscle while you lean out"), icon: "flame" },
+  { id: "fitness", title: N_("Stay fit"), body: N_("Train consistently and feel good"), icon: "sparkle" },
 ];
 const EXPERIENCE: { id: Experience; title: string; body: string }[] = [
-  { id: "new", title: "New to lifting", body: "Less than 6 months of steady training" },
-  { id: "intermediate", title: "Some experience", body: "6 months to 3 years" },
-  { id: "advanced", title: "Experienced", body: "3+ years, comfortable with heavy compounds" },
+  { id: "new", title: N_("New to lifting"), body: N_("Less than 6 months of steady training") },
+  { id: "intermediate", title: N_("Some experience"), body: N_("6 months to 3 years") },
+  { id: "advanced", title: N_("Experienced"), body: N_("3+ years, comfortable with heavy compounds") },
 ];
 const EQUIPMENT: { id: EquipmentProfile; title: string; body: string }[] = [
-  { id: "gym", title: "Full gym", body: "Barbells, cables and machines" },
-  { id: "dumbbells", title: "Dumbbells & bench", body: "Home or hotel gym with a pull-up bar" },
-  { id: "home", title: "Minimal home setup", body: "Bodyweight, bands and a pair of dumbbells" },
+  { id: "gym", title: N_("Full gym"), body: N_("Barbells, cables and machines") },
+  { id: "dumbbells", title: N_("Dumbbells & bench"), body: N_("Home or hotel gym with a pull-up bar") },
+  { id: "home", title: N_("Minimal home setup"), body: N_("Bodyweight, bands and a pair of dumbbells") },
 ];
 const ACTIVITY: { id: Activity; title: string; body: string }[] = [
-  { id: "sedentary", title: "Mostly sitting", body: "Desk job, little walking" },
-  { id: "light", title: "Lightly active", body: "Some walking during the day" },
-  { id: "moderate", title: "Active", body: "On your feet a lot, or 8k+ steps" },
-  { id: "very", title: "Very active", body: "Physical job or 12k+ steps" },
+  { id: "sedentary", title: N_("Mostly sitting"), body: N_("Desk job, little walking") },
+  { id: "light", title: N_("Lightly active"), body: N_("Some walking during the day") },
+  { id: "moderate", title: N_("Active"), body: N_("On your feet a lot, or 8k+ steps") },
+  { id: "very", title: N_("Very active"), body: N_("Physical job or 12k+ steps") },
 ];
 const FOCUS = ["chest", "lats", "upper_back", "side_delts", "rear_delts", "biceps", "triceps", "quads", "hamstrings", "glutes", "calves", "abs"];
 
@@ -67,7 +67,7 @@ export function Onboarding({ initial, name, onDone }: { initial: Profile | null;
   return (
     <div className="onb">
       <header className="onb-head">
-        <button className="icon-btn" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0} aria-label="Back">
+        <button className="icon-btn" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0} aria-label={t("Back")}>
           <Icon name="chevron" className="flip" />
         </button>
         <div className="onb-progress" role="progressbar" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1}>
@@ -80,37 +80,37 @@ export function Onboarding({ initial, name, onDone }: { initial: Profile | null;
 
       <div className="onb-body" key={id}>
         {id === "goal" && (
-          <Question title={`What's your main goal${d.name ? `, ${d.name}` : ""}?`} sub="We'll shape your training and calories around it.">
+          <Question title={d.name ? t("What's your main goal, {name}?", { name: d.name }) : t("What's your main goal?")} sub={t("We'll shape your training and calories around it.")}>
             <Choices items={GOALS} value={d.goal} onChange={(v) => set("goal", v)} />
           </Question>
         )}
         {id === "experience" && (
-          <Question title="How long have you been lifting?" sub="This sets how many weekly sets you start with.">
+          <Question title={t("How long have you been lifting?")} sub={t("This sets how many weekly sets you start with.")}>
             <Choices items={EXPERIENCE} value={d.experience} onChange={(v) => set("experience", v)} />
           </Question>
         )}
         {id === "days" && (
-          <Question title="How many days a week can you train?" sub="Pick what you can keep up on a busy week.">
+          <Question title={t("How many days a week can you train?")} sub={t("Pick what you can keep up on a busy week.")}>
             <div className="day-picker">
               {[3, 4, 5, 6].map((n) => (
                 <button key={n} className={`day-pick${d.daysPerWeek === n ? " on" : ""}`} onClick={() => set("daysPerWeek", n)} aria-pressed={d.daysPerWeek === n}>
                   <strong>{n}</strong>
-                  <span>days</span>
+                  <span>{t("days")}</span>
                 </button>
               ))}
             </div>
             <p className="onb-hint">
-              <Icon name="sparkle" size={16} /> {TEMPLATES.find((t) => t.slug === recommendTemplate(d.daysPerWeek))!.name} fits {d.daysPerWeek} days best.
+              <Icon name="sparkle" size={16} /> {t("{program} fits {n} days best.", { program: t(TEMPLATES.find((x) => x.slug === recommendTemplate(d.daysPerWeek))!.name), n: d.daysPerWeek })}
             </p>
           </Question>
         )}
         {id === "equipment" && (
-          <Question title="Where do you train?" sub="We'll only pick exercises you can actually do.">
+          <Question title={t("Where do you train?")} sub={t("We'll only pick exercises you can actually do.")}>
             <Choices items={EQUIPMENT} value={d.equipment} onChange={(v) => set("equipment", v)} />
           </Question>
         )}
         {id === "focus" && (
-          <Question title="Any muscles you want to bring up?" sub="Optional. Each pick adds a set to exercises that train it.">
+          <Question title={t("Any muscles you want to bring up?")} sub={t("Optional. Each pick adds a set to exercises that train it.")}>
             <div className="chip-grid">
               {FOCUS.map((m) => {
                 const on = d.focusMuscles.includes(m);
@@ -122,61 +122,61 @@ export function Onboarding({ initial, name, onDone }: { initial: Profile | null;
                     onClick={() => set("focusMuscles", on ? d.focusMuscles.filter((x) => x !== m) : [...d.focusMuscles, m].slice(-3))}
                   >
                     {on && <Icon name="check" size={14} stroke={2.6} />}
-                    {MUSCLES.find((x) => x.slug === m)?.name}
+                    {muscleName.get(m)}
                   </button>
                 );
               })}
             </div>
-            <p className="onb-hint muted">Pick up to 3.</p>
+            <p className="onb-hint muted">{t("Pick up to 3.")}</p>
           </Question>
         )}
         {id === "body" && (
-          <Question title="A bit about you" sub="Used only to personalize your plan and estimate calories and protein.">
+          <Question title={t("A bit about you")} sub={t("Used only to personalize your plan and estimate calories and protein.")}>
             <label className="field">
-              <span>What should we call you?</span>
-              <input id="onb-name" autoComplete="given-name" value={d.name} onChange={(e) => set("name", e.target.value)} placeholder="Your first name" />
+              <span>{t("What should we call you?")}</span>
+              <input id="onb-name" autoComplete="given-name" value={d.name} onChange={(e) => set("name", e.target.value)} placeholder={t("Your first name")} />
             </label>
-            <div className="segmented" role="tablist" aria-label="Sex">
+            <div className="segmented" role="tablist" aria-label={t("Sex")}>
               {(["male", "female"] as Sex[]).map((s) => (
                 <button key={s} role="tab" aria-selected={d.sex === s} className={d.sex === s ? "on" : ""} onClick={() => set("sex", s)}>
-                  {s === "male" ? "Male" : "Female"}
+                  {s === "male" ? t("Male") : t("Female")}
                 </button>
               ))}
             </div>
             <div className="num-fields">
-              <NumField id="onb-age" label="Age" unit="yrs" value={d.age} onChange={(v) => set("age", v)} />
-              <NumField id="onb-height" label="Height" unit="cm" value={d.heightCm} onChange={(v) => set("heightCm", v)} />
-              <NumField id="onb-weight" label="Weight" unit="kg" value={d.weightKg} onChange={(v) => set("weightKg", v)} />
+              <NumField id="onb-age" label={t("Age")} unit={t("yrs")} value={d.age} onChange={(v) => set("age", v)} />
+              <NumField id="onb-height" label={t("Height")} unit="cm" value={d.heightCm} onChange={(v) => set("heightCm", v)} />
+              <NumField id="onb-weight" label={t("Weight")} unit="kg" value={d.weightKg} onChange={(v) => set("weightKg", v)} />
             </div>
-            <p className="onb-label">Daily activity outside the gym</p>
+            <p className="onb-label">{t("Daily activity outside the gym")}</p>
             <Choices items={ACTIVITY} value={d.activity} onChange={(v) => set("activity", v)} compact />
           </Question>
         )}
         {id === "plan" && (
-          <Question title="Your plan is ready" sub="Pick a program. You can switch or swap exercises any time.">
+          <Question title={t("Your plan is ready")} sub={t("Pick a program. You can switch or swap exercises any time.")}>
             <div className="plan-cards">
-              {TEMPLATES.map((t) => (
-                <button key={t.slug} className={`plan-card${chosen === t.slug ? " on" : ""}`} onClick={() => set("programSlug", t.slug)} aria-pressed={chosen === t.slug}>
+              {TEMPLATES.map((tp) => (
+                <button key={tp.slug} className={`plan-card${chosen === tp.slug ? " on" : ""}`} onClick={() => set("programSlug", tp.slug)} aria-pressed={chosen === tp.slug}>
                   <span className="plan-card-top">
-                    <strong>{t.name}</strong>
-                    {t.slug === recommended && <span className="pill">Recommended</span>}
+                    <strong>{t(tp.name)}</strong>
+                    {tp.slug === recommended && <span className="pill">{t("Recommended")}</span>}
                   </span>
-                  <span className="plan-card-body">{t.description}</span>
+                  <span className="plan-card-body">{tp.description ? t(tp.description) : null}</span>
                   <span className="plan-card-days">
-                    {t.weekLayout.map((k, i) => (
-                      <span key={i}>{t.days.find((x) => x.key === k)!.label}</span>
+                    {tp.weekLayout.map((k, i) => (
+                      <span key={i}>{dayName(tp.days.find((x) => x.key === k)!.label)}</span>
                     ))}
                   </span>
                 </button>
               ))}
             </div>
             <div className="card macro-preview">
-              <p className="onb-label">Daily targets</p>
+              <p className="onb-label">{t("Daily targets")}</p>
               <div className="macro-preview-row">
                 <span><strong>{macros.calories}</strong> kcal</span>
-                <span><strong>{macros.protein}g</strong> protein</span>
-                <span><strong>{macros.carbs}g</strong> carbs</span>
-                <span><strong>{macros.fat}g</strong> fat</span>
+                <span><strong>{macros.protein}g</strong> {t("protein")}</span>
+                <span><strong>{macros.carbs}g</strong> {t("carbs")}</span>
+                <span><strong>{macros.fat}g</strong> {t("fat")}</span>
               </div>
             </div>
           </Question>
@@ -185,9 +185,9 @@ export function Onboarding({ initial, name, onDone }: { initial: Profile | null;
 
       <footer className="onb-foot">
         <button className="btn-primary" onClick={next} disabled={id === "body" && !bodyValid}>
-          {id === "plan" ? "Start training" : "Continue"}
+          {id === "plan" ? t("Start training") : t("Continue")}
         </button>
-        {id === "body" && !bodyValid && <p className="auth-msg error">Check your age, height and weight.</p>}
+        {id === "body" && !bodyValid && <p className="auth-msg error">{t("Check your age, height and weight.")}</p>}
       </footer>
     </div>
   );
@@ -224,8 +224,8 @@ function Choices<T extends string>({
             </span>
           )}
           <span className="choice-text">
-            <strong>{it.title}</strong>
-            <span>{it.body}</span>
+            <strong>{t(it.title)}</strong>
+            <span>{t(it.body)}</span>
           </span>
           <span className="choice-radio" aria-hidden="true">
             {value === it.id && <Icon name="check" size={14} stroke={3} />}

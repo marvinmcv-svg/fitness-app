@@ -12,7 +12,7 @@ createRoot(document.getElementById("root")!).render(
 // Offline support when installed from a real web address (not inside the claude.ai preview frame).
 if (import.meta.env.PROD && "serviceWorker" in navigator && location.protocol === "https:" && window.top === window.self) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL }).catch(() => {
       /* offline mode unavailable; the app still works online */
     });
   });

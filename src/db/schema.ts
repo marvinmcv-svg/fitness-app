@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -15,7 +16,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { authenticatedRole, authUid, authUsers } from "drizzle-orm/supabase";
+import { anonRole, authenticatedRole, authUid, authUsers } from "drizzle-orm/supabase";
 import {
   MOVEMENT_PATTERNS,
   SET_TYPES,
@@ -304,4 +305,27 @@ export const foodLogs = pgTable(
     source: text("source").notNull().default("manual"),
   },
   (t) => [index("food_logs_user_eaten_idx").on(t.userId, t.eatenAt), ownRows("food_logs_own", t.userId)],
+).enableRLS();
+
+/* --------------------------------------------------------------- waitlist */
+
+// Landing page sign-ups. Anyone may add an address; nobody can read the list
+// through the API (view it in the Supabase dashboard or with the service role).
+export const waitlist = pgTable(
+  "waitlist",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    // UI language when they signed up, e.g. "es".
+    lang: text("lang"),
+    // Where the sign-up came from, e.g. "landing-hero".
+    source: text("source"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("waitlist_email_key").on(sql`lower(${t.email})`),
+    check("waitlist_email_shape", sql`char_length(${t.email}) <= 254 and ${t.email} ~* '^[^@[:space:]]+@[^@[:space:]]+[.][^@[:space:]]+$'`),
+    check("waitlist_fields_short", sql`coalesce(char_length(${t.lang}), 0) <= 12 and coalesce(char_length(${t.source}), 0) <= 40`),
+    pgPolicy("waitlist_join", { for: "insert", to: [anonRole, authenticatedRole], withCheck: sql`true` }),
+  ],
 ).enableRLS();

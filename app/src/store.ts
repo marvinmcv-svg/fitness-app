@@ -12,6 +12,7 @@ import {
 } from "../../src/domain/personalize";
 import { nextProgression, type ProgressionDecision, type SessionResult } from "../../src/domain/progression";
 import type { CoachAction } from "../../src/coach/spec";
+import { dayName, detectLang, t, type Lang } from "./i18n";
 import type { Slot } from "../../src/domain/template";
 import type { LoggedSet, VolumeTarget, Workout } from "../../src/domain/types";
 import { buildCatalog, computeWeeklyVolume } from "../../src/domain/volume";
@@ -75,9 +76,17 @@ export interface Account {
   email?: string;
   name?: string;
 }
-export const muscleName = new Map(MUSCLES.map((m) => [m.slug, m.name]));
-export const exerciseName = (slug: string) => catalog.exercises.get(slug)?.name ?? slug;
-export const techniqueName = (slug: string) => catalog.techniques.get(slug)?.name ?? slug;
+const MUSCLE_EN = new Map(MUSCLES.map((m) => [m.slug, m.name]));
+/** Display names in the current language. */
+export const muscleName = { get: (slug: string): string | undefined => (MUSCLE_EN.has(slug) ? t(MUSCLE_EN.get(slug)!) : undefined) };
+export const exerciseName = (slug: string) => {
+  const n = catalog.exercises.get(slug)?.name;
+  return n ? t(n) : slug;
+};
+export const techniqueName = (slug: string) => {
+  const n = catalog.techniques.get(slug)?.name;
+  return n ? t(n) : slug;
+};
 
 /** Muscles tracked against weekly targets, in display order. */
 export const TRACKED_MUSCLES = [
@@ -143,7 +152,16 @@ export interface CoachState {
   chat: CoachMessage[];
 }
 
+export type Appearance = "system" | "light" | "dark";
+export type Accent = "violet" | "ember" | "ocean" | "forest" | "rose" | "graphite";
+export interface Settings {
+  appearance: Appearance;
+  accent: Accent;
+  lang: Lang;
+}
+
 export interface AppState {
+  settings: Settings;
   history: Workout[];
   active: ActiveSession | null;
   preset: TargetPreset;
@@ -154,7 +172,10 @@ export interface AppState {
   coach: CoachState;
 }
 
+export const defaultSettings = (): Settings => ({ appearance: "system", accent: "violet", lang: detectLang() });
+
 export const emptyState = (): AppState => ({
+  settings: defaultSettings(),
   history: [],
   active: null,
   preset: "standard",
@@ -165,15 +186,19 @@ export const emptyState = (): AppState => ({
   coach: { memory: [], chat: [] },
 });
 
-const KEY = "setwise:v1";
+const KEY = "fuerzaflow:v1";
+/** The app's name before the rename; saves under it are carried over once. */
+const LEGACY_KEY = "setwise:v1";
 let seq = 0;
 export const uid = () => `${Date.now().toString(36)}-${(seq++).toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 
 function load(): AppState | null {
   try {
-    const raw = localStorage.getItem(KEY);
-    // Older saves lack the account/profile/food fields.
-    return raw ? { ...emptyState(), ...(JSON.parse(raw) as Partial<AppState>) } : null;
+    const raw = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY);
+    if (!raw) return null;
+    // Older saves lack newer fields (account, profile, food, coach, settings).
+    const saved = JSON.parse(raw) as Partial<AppState>;
+    return { ...emptyState(), ...saved, settings: { ...defaultSettings(), ...saved.settings } };
   } catch {
     return null;
   }
@@ -206,9 +231,9 @@ export function dayByKey(key: string): PersonalizedTemplate["days"][number] {
 export function dayLabel(key: string): string {
   for (const t of TEMPLATES) {
     const d = t.days.find((x) => x.key === key);
-    if (d) return d.label;
+    if (d) return dayName(d.label);
   }
-  return "Workout";
+  return t("Workout");
 }
 
 /** Next day in the rotation after the most recent programmed workout. */

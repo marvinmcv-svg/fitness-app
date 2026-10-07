@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { cloudEnabled, signInWithEmail, signInWithGoogle, signUpWithEmail } from "../cloud";
+import { LANGS, t, type Lang } from "../i18n";
 import { Icon, type IconName } from "../ui/Icon";
 import { Ring } from "../ui/Ring";
 
-const FEATURES: { icon: IconName; title: string; body: string }[] = [
-  { icon: "sparkle", title: "A program built for you", body: "Answer a few questions and get a plan that fits your days, equipment and goals." },
-  { icon: "camera", title: "Macros from a photo", body: "Snap your plate or scan a barcode to log protein, carbs and fat in seconds." },
-  { icon: "chart", title: "Every muscle on target", body: "Weekly set targets per muscle, with progression suggestions every session." },
+const FEATURES = (): { icon: IconName; title: string; body: string }[] => [
+  { icon: "sparkle", title: t("A program built for you"), body: t("Answer a few questions and get a plan that fits your days, equipment and goals.") },
+  { icon: "camera", title: t("Macros from a photo"), body: t("Snap your plate or scan a barcode to log protein, carbs and fat in seconds.") },
+  { icon: "chart", title: t("An AI coach that knows you"), body: t("Daily briefs, workouts adjusted to how you feel, and answers from your own data.") },
 ];
 
-export function Welcome({ onGuest }: { onGuest: () => void }) {
+export function Welcome({ onGuest, lang, onLang }: { onGuest: () => void; lang: Lang; onLang: (l: Lang) => void }) {
   const [mode, setMode] = useState<"start" | "signup" | "signin">("start");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,7 +28,7 @@ export function Welcome({ onGuest }: { onGuest: () => void }) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) return setMessage({ tone: "error", text: "Use at least 8 characters for your password." });
+    if (password.length < 8) return setMessage({ tone: "error", text: t("Use at least 8 characters for your password.") });
     setBusy(true);
     setMessage(null);
     const r = mode === "signup" ? await signUpWithEmail(email.trim(), password, name.trim()) : await signInWithEmail(email.trim(), password);
@@ -39,11 +40,24 @@ export function Welcome({ onGuest }: { onGuest: () => void }) {
   return (
     <div className="welcome">
       <section className="welcome-hero">
-        <div className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            <Icon name="dumbbell" size={18} stroke={2.4} />
-          </span>
-          Setwise
+        <div className="welcome-top">
+          <div className="brand">
+            <span className="brand-mark" aria-hidden="true">
+              <Icon name="dumbbell" size={18} stroke={2.4} />
+            </span>
+            FuerzaFlow
+          </div>
+          <label className="lang-pick">
+            <Icon name="globe" size={16} />
+            <span className="sr-only">{t("Language")}</span>
+            <select id="welcome-lang" value={lang} onChange={(e) => onLang(e.target.value as Lang)}>
+              {LANGS.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
         <div className="hero-rings" aria-hidden="true">
           <Ring value={0.82} size={150} width={13} color="var(--hero-accent)" track="var(--hero-track)" />
@@ -54,15 +68,15 @@ export function Welcome({ onGuest }: { onGuest: () => void }) {
             <Ring value={0.91} size={74} width={13} color="var(--warn)" track="var(--hero-track)" />
           </div>
         </div>
-        <h1 className="welcome-title">Train smarter. Eat on target.</h1>
-        <p className="welcome-sub">Your workouts, weekly muscle volume and daily macros in one app, personalized from day one.</p>
+        <h1 className="welcome-title">{t("Train smarter. Eat on target.")}</h1>
+        <p className="welcome-sub">{t("Your workouts, weekly muscle volume and daily macros in one app, personalized from day one.")}</p>
       </section>
 
       <div className="welcome-body">
         {mode === "start" ? (
           <>
             <ul className="feature-list">
-              {FEATURES.map((f) => (
+              {FEATURES().map((f) => (
                 <li key={f.title} className="feature">
                   <span className="feature-icon">
                     <Icon name={f.icon} size={20} />
@@ -78,65 +92,65 @@ export function Welcome({ onGuest }: { onGuest: () => void }) {
             <div className="auth-actions">
               <button className="btn-google" onClick={google} disabled={busy}>
                 <GoogleMark />
-                Continue with Google
+                {t("Continue with Google")}
               </button>
               <button className="btn-primary" onClick={() => { setMode("signup"); setMessage(null); }}>
-                Sign up with email
+                {t("Sign up with email")}
               </button>
               <button className="btn-plain" onClick={onGuest}>
-                Try it without an account
+                {t("Try it without an account")}
               </button>
               {message && <p className={`auth-msg ${message.tone}`} role="alert">{message.text}</p>}
               <p className="auth-foot">
-                Already a member?{" "}
+                {t("Already a member?")}{" "}
                 <button className="inline-link" onClick={() => { setMode("signin"); setMessage(null); }}>
-                  Sign in
+                  {t("Sign in")}
                 </button>
               </p>
-              {!cloudEnabled && <p className="auth-note">Preview build: accounts turn on once the backend is connected. Guest mode saves to this device.</p>}
+              {!cloudEnabled && <p className="auth-note">{t("Preview build: accounts turn on once the backend is connected. Guest mode saves to this device.")}</p>}
             </div>
           </>
         ) : (
           <form className="auth-form" onSubmit={submit}>
             <button type="button" className="back-link" onClick={() => { setMode("start"); setMessage(null); }}>
-              <Icon name="chevron" size={16} className="flip" /> Back
+              <Icon name="chevron" size={16} className="flip" /> {t("Back")}
             </button>
-            <h2>{mode === "signup" ? "Create your account" : "Welcome back"}</h2>
+            <h2>{mode === "signup" ? t("Create your account") : t("Welcome back")}</h2>
             <button type="button" className="btn-google" onClick={google} disabled={busy}>
               <GoogleMark />
-              {mode === "signup" ? "Sign up with Google" : "Sign in with Google"}
+              {mode === "signup" ? t("Sign up with Google") : t("Sign in with Google")}
             </button>
-            <div className="divider"><span>or</span></div>
+            <div className="divider"><span>{t("or")}</span></div>
             {mode === "signup" && (
               <label className="field">
-                <span>Name</span>
-                <input id="auth-name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your first name" required />
+                <span>{t("Name")}</span>
+                <input id="auth-name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Your first name")} required />
               </label>
             )}
             <label className="field">
-              <span>Email</span>
-              <input id="auth-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+              <span>{t("Email")}</span>
+              <input id="auth-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("you@example.com")} required />
             </label>
             <label className="field">
-              <span>Password</span>
+              <span>{t("Password")}</span>
               <input
                 id="auth-password"
                 type="password"
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder={t("At least 8 characters")}
                 required
               />
             </label>
             {message && <p className={`auth-msg ${message.tone}`} role="alert">{message.text}</p>}
             <button className="btn-primary" type="submit" disabled={busy}>
-              {busy ? "One moment…" : mode === "signup" ? "Create account" : "Sign in"}
+              {busy ? t("One moment…") : mode === "signup" ? t("Create account") : t("Sign in")}
             </button>
             <p className="auth-foot">
-              {mode === "signup" ? "Already a member? " : "New here? "}
+              {mode === "signup" ? t("Already a member?") : t("New here?")}{" "}
               <button type="button" className="inline-link" onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setMessage(null); }}>
-                {mode === "signup" ? "Sign in" : "Create an account"}
+                {mode === "signup" ? t("Sign in") : t("Create an account")}
               </button>
             </p>
           </form>

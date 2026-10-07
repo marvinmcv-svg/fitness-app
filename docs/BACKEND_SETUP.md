@@ -8,18 +8,20 @@ The app runs without a backend: guests' data stays on their device. Connect Supa
 2. Apply the migrations in `drizzle/` in order (SQL editor, `psql`, or `npx drizzle-kit migrate` with `DATABASE_URL` set):
    - `0000_init.sql`: training tables
    - `0001_members_and_macros.sql`: `profiles` and `food_logs`
+   - `0002_waitlist.sql`: `waitlist` (landing page sign-ups; anyone can add, nobody can read through the API)
    Every table has row-level security, so members can only read and write their own rows.
 3. Copy `.env.example` to `.env`. Fill in the project URL and publishable key from **Project Settings → API**.
+4. In Vercel (**fuerzaflow → Settings → Environment Variables**), add the same two values as `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` for Production and Preview, then redeploy. The app and the landing page waitlist both use them.
 
 ## 2. Turn on Google sign-in
 
 1. In Google Cloud Console, go to **APIs & Services → Credentials** and create an **OAuth client ID** (type: Web application).
-   - Authorized JavaScript origins: your app's URL (and `http://localhost:5173` for local dev).
+   - Authorized JavaScript origins: `https://fuerzaflow.vercel.app` (and `http://localhost:5173` for local dev).
    - Authorized redirect URI: `https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback`
 2. In Supabase, go to **Authentication → Sign In / Providers → Google**. Enable it and paste the client ID and secret.
 3. In Supabase, go to **Authentication → URL Configuration**:
-   - Set **Site URL** to your app's URL.
-   - Add each URL you run the app from (production, `http://localhost:5173`) to **Redirect URLs**.
+   - Set **Site URL** to `https://fuerzaflow.vercel.app/app/`.
+   - Add each URL you run the app from to **Redirect URLs**: `https://fuerzaflow.vercel.app/app/`, `https://fuerzaflow.vercel.app/app/**` and `http://localhost:5173/**`.
 
 Email sign-up works as soon as the project exists. Supabase sends a confirmation email by default; you can change this under **Authentication → Sign In / Providers → Email**.
 
@@ -46,7 +48,7 @@ The coach has two parts:
 - **Rules-based coaching** works with no setup, offline and free: the daily brief on Today, the readiness check before each workout, the post-workout summary with personal records, the weekly review, and safety replies for red-flag messages.
 - **Chat coach (Claude)**: runs through the Vercel Function `api/coach.ts`. To turn it on:
   1. Create an API key at console.anthropic.com. Set a monthly spend limit there.
-  2. In Vercel, open **setwise → Settings → Environment Variables** and add `ANTHROPIC_API_KEY`, for Production and Preview.
+  2. In Vercel, open **fuerzaflow → Settings → Environment Variables** and add `ANTHROPIC_API_KEY`, for Production and Preview.
   3. Redeploy (or push any commit).
 
 Until the key is set, the chat shows "The AI coach isn't connected yet" and everything else keeps working.
