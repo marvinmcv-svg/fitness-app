@@ -425,8 +425,9 @@
 
   [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); transition-delay: var(--d, 0s); }
   [data-reveal].in { opacity: 1; transform: none; }
-  .split-words .w { display: inline-block; overflow: clip; vertical-align: bottom; padding-bottom: 0.06em; }
-  .split-words .w > span { display: inline-block; transform: translateY(110%); transition: transform 0.9s var(--ease); transition-delay: calc(var(--i) * 45ms); }
+  /* Room below the baseline so descenders (g, y, p) are not clipped; the negative margin keeps line spacing unchanged. */
+  .split-words .w { display: inline-block; overflow: clip; vertical-align: bottom; padding-bottom: 0.22em; margin-bottom: -0.16em; }
+  .split-words .w > span { display: inline-block; transform: translateY(calc(100% + 0.3em)); transition: transform 0.9s var(--ease); transition-delay: calc(var(--i) * 45ms); }
   .split-words.in .w > span { transform: none; }
 
   /* Scroll story */
