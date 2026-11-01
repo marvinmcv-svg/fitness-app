@@ -242,7 +242,7 @@
 
   .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
   .hero h1 { font-size: clamp(52px, 9.2vw, 128px); }
-  .rotator { position: relative; display: inline-grid; vertical-align: bottom; height: 1.02em; overflow: clip; }
+  .rotator { position: relative; display: inline-grid; vertical-align: bottom; height: 1.24em; margin-bottom: -0.22em; overflow: clip; }
   .rotator > span {
     grid-area: 1 / 1;
     transform: translateY(105%);
@@ -250,6 +250,7 @@
     transition: transform 0.7s var(--ease), opacity 0.7s var(--ease);
     padding-right: 0.06em;
   }
+  /* The gradient lives on each word, not the rotator: background-clip:text on a parent paints every child word's glyphs, hidden ones included, in some browsers. */
   .rotator > span.on { transform: none; opacity: 1; }
   .rotator > span.out { transform: translateY(-105%); opacity: 0; }
   .rotator-sizer { visibility: hidden; grid-area: 1 / 1; }
@@ -648,9 +649,9 @@
       <div class="hero-copy">
         <p class="eyebrow" data-reveal data-i18n="hero.kicker">AI strength coach · Macros · 6 languages</p>
         <h1 class="display" data-reveal style="--d: 0.08s">
-          <span class="rotator grad-text" id="rotator" aria-label="Strength">
+          <span class="rotator" id="rotator" aria-label="Strength">
             <span class="rotator-sizer" aria-hidden="true">Strength</span>
-            <span class="on">Strength</span><span>Fuerza</span><span>Força</span><span>Force</span><span>Kraft</span><span>Forza</span>
+            <span class="grad-text on">Strength</span><span class="grad-text">Fuerza</span><span class="grad-text">Força</span><span class="grad-text">Force</span><span class="grad-text">Kraft</span><span class="grad-text">Forza</span>
           </span>
           <span class="rest" data-i18n="hero.rest">that flows with you.</span>
         </h1>
